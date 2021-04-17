@@ -1,0 +1,4 @@
+<S> -> <A> var | <B>
+<A> -> sad <C>
+<A> -> glad
+<C> -> e
