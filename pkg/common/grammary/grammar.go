@@ -1,4 +1,4 @@
-package grammar
+package grammary
 
 import (
 	"github.com/pkg/errors"
@@ -6,7 +6,13 @@ import (
 	"strings"
 )
 
-const ruleSidesSeparator = "->"
+const (
+	EmptySymbol   = "e"
+	EndOfSequence = "_|_"
+
+	ruleSidesSeparator    = "->"
+	ruleSequenceSeparator = "/"
+)
 
 func NewSymbol(ch string) Symbol {
 	return Symbol{ch: ch}
@@ -16,28 +22,32 @@ type Symbol struct {
 	ch string
 }
 
-func (s Symbol) Terminal() bool {
-	return IsTerminalSymbol(s.ch)
+func (s Symbol) NonTerminal() bool {
+	return IsNonTerminalSymbol(s.ch)
 }
 
-func IsTerminalSymbol(value string) bool {
-	matched, _ := regexp.MatchString(`<[A-Z]>`, value)
-	return matched
+func (s Symbol) String() string {
+	return s.ch
 }
 
 func NewGrammar() Grammar {
 	return Grammar{
-		impl: make(map[Symbol][][]Symbol),
+		Impl: make(map[Symbol][][]Symbol),
 	}
 }
 
 type Grammar struct {
 	Axiom *Symbol
-	impl  map[Symbol][][]Symbol
+	Impl  map[Symbol][][]Symbol
 }
 
 func (g *Grammar) AddRule(ruleLeftSide Symbol, alternatives [][]Symbol) {
-	g.impl[ruleLeftSide] = alternatives
+	g.Impl[ruleLeftSide] = alternatives
+}
+
+func IsNonTerminalSymbol(value string) bool {
+	matched, _ := regexp.MatchString(`<[A-Z]>`, value)
+	return matched
 }
 
 func Parse(rawData string) (Grammar, error) {
@@ -76,12 +86,12 @@ func Parse(rawData string) (Grammar, error) {
 				continue
 			}
 
-			if IsTerminalSymbol(buffer) && leftSideSymbol == nil {
+			if IsNonTerminalSymbol(buffer) && leftSideSymbol == nil {
 				newSymbol := NewSymbol(buffer)
 				leftSideSymbol = &newSymbol
 				buffer = ""
 				// check if we already this rule and this another alternative
-				alts, exists := grammar.impl[newSymbol]
+				alts, exists := grammar.Impl[newSymbol]
 				if exists {
 					alternatives = alts
 				}
@@ -123,19 +133,4 @@ func Parse(rawData string) (Grammar, error) {
 	}
 
 	return grammar, nil
-}
-
-func Serialize(grammar Grammar) string {
-	var buffer string
-	for symbol, alternativesRolls := range grammar.impl {
-		for _, roll := range alternativesRolls {
-			rule := symbol.ch + " " + ruleSidesSeparator + " "
-			for _, symbolInRule := range roll {
-				rule += symbolInRule.ch + " "
-			}
-			rule = strings.Trim(rule, " ")
-			buffer += rule + "\n"
-		}
-	}
-	return buffer
 }

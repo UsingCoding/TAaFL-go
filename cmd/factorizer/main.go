@@ -1,7 +1,8 @@
 package main
 
 import (
-	"compiler/pkg/common/grammar"
+	"compiler/pkg/common/grammary"
+	"compiler/pkg/factorizer/app"
 	"fmt"
 	"io/ioutil"
 )
@@ -16,12 +17,23 @@ func main() {
 		fmt.Println(err)
 	}
 
-	grammatic, err := grammar.Parse(rawData)
+	grammar, err := grammary.Parse(rawData)
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	fmt.Println(grammar.Serialize(grammatic))
+	grammarSerializer := grammary.NewSerializer()
+
+	grammarWithHeadSequences, err := app.BuildHeadSequencesForGrammar(grammar)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	serializedGrammar, err := grammarSerializer.SerializeGrammar(&grammarWithHeadSequences)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(serializedGrammar)
 }
 
 func getFileData(path string) (string, error) {
