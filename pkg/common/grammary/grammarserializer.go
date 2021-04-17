@@ -43,12 +43,14 @@ func serialize(grammar *Grammar) string {
 func serializeWithSequences(grammar *GrammarWithHeadSequences) string {
 	var buffer string
 	for symbol, alternativesRolls := range grammar.Grammar.Impl {
-		for _, roll := range alternativesRolls {
+		for rollNumber, roll := range alternativesRolls {
 			rule := symbol.ch + " " + ruleSidesSeparator + " "
 			for _, symbolInRule := range roll {
 				rule += symbolInRule.ch + " "
 			}
-			rule = strings.Trim(rule, " ")
+
+			rule += ruleSequenceSeparator + " "
+			rule += strings.Join(grammar.Sequences[symbol][rollNumber], " ")
 			buffer += rule + "\n"
 		}
 	}
