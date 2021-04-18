@@ -12,28 +12,42 @@ const (
 )
 
 func main() {
-	rawData, err := getFileData(exampleFilePath)
+	err := runService()
 	if err != nil {
 		fmt.Println(err)
+	}
+}
+
+func runService() error {
+	rawData, err := getFileData(exampleFilePath)
+	if err != nil {
+		return err
 	}
 
 	grammar, err := grammary.Parse(rawData)
 	if err != nil {
-		fmt.Println(err)
+		return err
+	}
+
+	err = app.FactorizeGrammar(grammar)
+	if err != nil {
+		return err
 	}
 
 	grammarSerializer := grammary.NewSerializer()
 
 	grammarWithHeadSequences, err := app.BuildHeadSequencesForGrammar(grammar)
 	if err != nil {
-		fmt.Println(err)
+		return err
 	}
 
 	serializedGrammar, err := grammarSerializer.SerializeGrammar(&grammarWithHeadSequences)
 	if err != nil {
-		fmt.Println(err)
+		return err
 	}
 	fmt.Println(serializedGrammar)
+
+	return nil
 }
 
 func getFileData(path string) (string, error) {
