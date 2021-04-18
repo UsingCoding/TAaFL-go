@@ -9,7 +9,7 @@ import (
 func BuildHeadSequencesForGrammar(grammar grammary.Grammar) (grammary.GrammarWithHeadSequences, error) {
 	sequences := make(map[grammary.Symbol][][]string)
 
-	skippedNonTerminals := make(map[grammary.Symbol][]grammary.Symbol)
+	skippedNonTerminals := make(map[grammary.Symbol]map[int]grammary.Symbol)
 
 	var emptySymbolNonTerminals []grammary.Symbol
 
@@ -20,12 +20,11 @@ func BuildHeadSequencesForGrammar(grammar grammary.Grammar) (grammary.GrammarWit
 				// we skip populating sequence to fill it with terminals
 				symbols, exists := skippedNonTerminals[leftSideSymbol]
 				if exists {
-					symbols = append(symbols, symbol)
-					skippedNonTerminals[leftSideSymbol] = symbols
+					symbols[rollNumber] = symbol
 					continue
 				}
 
-				skippedNonTerminals[leftSideSymbol] = []grammary.Symbol{symbol}
+				skippedNonTerminals[leftSideSymbol] = map[int]grammary.Symbol{rollNumber: symbol}
 				continue
 			}
 
@@ -45,6 +44,7 @@ func BuildHeadSequencesForGrammar(grammar grammary.Grammar) (grammary.GrammarWit
 				foundRoll := altsRolls[rollNumber]
 				foundRoll = append(foundRoll, symbol.String())
 				altsRolls[rollNumber] = foundRoll
+				sequences[leftSideSymbol] = altsRolls
 				continue
 			}
 
@@ -58,24 +58,32 @@ func BuildHeadSequencesForGrammar(grammar grammary.Grammar) (grammary.GrammarWit
 	}
 
 	for leftSideSymbol, symbols := range skippedNonTerminals {
-		var alternatives [][]string
-		for _, symbol := range symbols {
+		sequence := sequences[leftSideSymbol]
+		for rollNumber, symbol := range symbols {
 			rolls, exists := sequences[symbol]
 			if !exists {
 				return grammary.GrammarWithHeadSequences{}, errors.New(fmt.Sprintf("missing nonterminal %s in left side", symbol))
 			}
-			alternatives = append(alternatives, collectHeadingSymbols(rolls))
+
+			// copy sequence to append after merging
+			afterRollNumberSequencePtr := sequence[rollNumber:]
+			afterRollNumberSequence := make([][]string, len(afterRollNumberSequencePtr))
+			copy(afterRollNumberSequence, afterRollNumberSequencePtr)
+
+			sequence = append(sequence[:rollNumber], collectHeadingSymbols(rolls))
+			sequence = append(sequence, afterRollNumberSequence...)
 		}
-		sequences[leftSideSymbol] = alternatives
+		sequences[leftSideSymbol] = sequence
+		fmt.Println(sequences)
 	}
 
 	for _, nonTerminal := range emptySymbolNonTerminals {
-		foundedSequnce, err := findSequenceForNonTerminal(grammar, nonTerminal)
+		foundedSequence, err := findSequenceForNonTerminal(grammar, nonTerminal)
 		if err != nil {
 			return grammary.GrammarWithHeadSequences{}, err
 		}
 
-		sequences[nonTerminal] = [][]string{{foundedSequnce}}
+		sequences[nonTerminal] = [][]string{{foundedSequence}}
 	}
 
 	return grammary.GrammarWithHeadSequences{
