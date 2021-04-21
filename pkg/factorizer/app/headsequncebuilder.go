@@ -74,7 +74,6 @@ func BuildHeadSequencesForGrammar(grammar grammary.Grammar) (grammary.GrammarWit
 			sequence = append(sequence, afterRollNumberSequence...)
 		}
 		sequences[leftSideSymbol] = sequence
-		fmt.Println(sequences)
 	}
 
 	for _, nonTerminal := range emptySymbolNonTerminals {

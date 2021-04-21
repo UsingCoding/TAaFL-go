@@ -10,8 +10,8 @@ const (
 	EmptySymbol   = "e"
 	EndOfSequence = "_|_"
 
-	ruleSidesSeparator    = "->"
-	ruleSequenceSeparator = "/"
+	RuleSidesSeparator    = "->"
+	RuleSequenceSeparator = "/"
 )
 
 func NewSymbol(ch string) Symbol {
@@ -72,7 +72,7 @@ func Parse(rawData string) (Grammar, error) {
 				continue
 			}
 
-			if buffer == ruleSidesSeparator {
+			if buffer == RuleSidesSeparator {
 				if leftSideSymbol == nil {
 					return Grammar{}, errors.New("no leftSideSymbol found")
 				}
