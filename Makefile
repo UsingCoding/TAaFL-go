@@ -1,5 +1,6 @@
 export APP_FACTORIZER_CMD_NAME = factorizer
 export APP_GENERATOR_CMD_NAME = generator
+export APP_RUNNER_CMD_NAME = runner
 export DOCKER_IMAGE_NAME = vadimmakerov/$(APP_CMD_NAME):master
 
 all: build check test
@@ -8,6 +9,7 @@ all: build check test
 build: modules
 	bin/go-build.sh "cmd/$(APP_FACTORIZER_CMD_NAME)" "bin/$(APP_FACTORIZER_CMD_NAME)" $(APP_FACTORIZER_CMD_NAME)
 	bin/go-build.sh "cmd/$(APP_GENERATOR_CMD_NAME)" "bin/$(APP_GENERATOR_CMD_NAME)" $(APP_GENERATOR_CMD_NAME)
+	bin/go-build.sh "cmd/$(APP_RUNNER_CMD_NAME)" "bin/$(APP_RUNNER_CMD_NAME)" $(APP_RUNNER_CMD_NAME)
 
 .PHONY: modules
 modules:
@@ -28,6 +30,10 @@ run-factorizer: build
 .PHONY: run-generator
 run-generator:
 	bin/$(APP_GENERATOR_CMD_NAME)
+
+.PHONY: run-runner
+run-runner:
+	bin/$(APP_RUNNER_CMD_NAME)
 
 .PHONY: publish
 publish:
