@@ -46,7 +46,7 @@ func (g *Grammar) AddRule(ruleLeftSide Symbol, alternatives [][]Symbol) {
 }
 
 func IsNonTerminalSymbol(value string) bool {
-	matched, _ := regexp.MatchString(`<[A-Z]>`, value)
+	matched, _ := regexp.MatchString(`<[A-Z]*>`, value)
 	return matched
 }
 

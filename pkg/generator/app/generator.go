@@ -2,8 +2,6 @@ package app
 
 import (
 	"compiler/pkg/common/grammary"
-	"fmt"
-	"io/ioutil"
 	"strconv"
 	"strings"
 )
@@ -15,15 +13,6 @@ table of right parts of rules:
 symbol | NM | ptr to left part of rule or next string | shift(0/1) | stack(0/1)
 */
 
-func main() {
-	data, err := getFileData("input.txt")
-	if err != nil {
-		fmt.Println(err)
-	}
-	left, right := CreateTables(data)
-	printTable(left)
-	printTable(right)
-}
 func CreateTables(data string) ([][]string, [][]string) {
 	m := make(map[string]int)
 	var leftParts, rightParts [][]string
@@ -161,20 +150,4 @@ func CreateTables(data string) ([][]string, [][]string) {
 		}
 	}
 	return leftParts, rightParts
-}
-func getFileData(path string) (string, error) {
-	b, err := ioutil.ReadFile(path)
-	if err != nil {
-		return "", err
-	}
-	// convert bytes to string
-	str := string(b)
-	// show file data
-	return str, nil
-}
-func printTable(table [][]string) {
-	fmt.Println()
-	for i := 0; i < len(table); i++ {
-		fmt.Println(table[i])
-	}
 }
