@@ -19,7 +19,7 @@ func CreateTables(data string) ([][]string, [][]string) {
 	var ptrToRightPart int
 	for _, line := range strings.Split(data, "\n") {
 		elem := ""
-		creatingNM := false
+		creatingNM, rightPartFlag := false, false
 		left, right := []string{}, [][]string{}
 		for _, i := range line {
 			ch := string(i)
@@ -45,7 +45,7 @@ func CreateTables(data string) ([][]string, [][]string) {
 			}
 			if !creatingNM {
 				if grammary.IsNonTerminalSymbol(elem) {
-					if strings.HasPrefix(line, elem) {
+					if strings.HasPrefix(line, elem) && !rightPartFlag {
 						v, ok := m[elem]
 						v = 0 + v
 						//add nonterminal in map with number of his string
@@ -53,6 +53,7 @@ func CreateTables(data string) ([][]string, [][]string) {
 							m[elem] = len(leftParts) + len(left)
 						}
 						left = append(left, elem)
+						rightPartFlag = true
 					} else {
 						temp := []string{}
 						temp = append(temp, elem)
