@@ -1,6 +1,7 @@
 export APP_FACTORIZER_CMD_NAME = factorizer
 export APP_GENERATOR_CMD_NAME = generator
 export APP_RUNNER_CMD_NAME = runner
+export APP_LEXER_CMD_NAME = lexer
 export DOCKER_IMAGE_NAME = vadimmakerov/$(APP_CMD_NAME):master
 
 all: build check test
@@ -10,6 +11,7 @@ build: modules
 	bin/go-build.sh "cmd/$(APP_FACTORIZER_CMD_NAME)" "bin/$(APP_FACTORIZER_CMD_NAME)" $(APP_FACTORIZER_CMD_NAME)
 	bin/go-build.sh "cmd/$(APP_GENERATOR_CMD_NAME)" "bin/$(APP_GENERATOR_CMD_NAME)" $(APP_GENERATOR_CMD_NAME)
 	bin/go-build.sh "cmd/$(APP_RUNNER_CMD_NAME)" "bin/$(APP_RUNNER_CMD_NAME)" $(APP_RUNNER_CMD_NAME)
+	bin/cpp-build.sh "data/$(APP_LEXER_CMD_NAME)/main.cpp" "bin/$(APP_LEXER_CMD_NAME)"
 
 .PHONY: modules
 modules:
@@ -33,8 +35,15 @@ run-generator:
 
 .PHONY: run-runner
 run-runner:
-	bin/$(APP_RUNNER_CMD_NAME)
+	bin/$(APP_RUNNER_CMD_NAME) "-l" "bin/$(APP_LEXER_CMD_NAME)" "-f" "data/runner/example.txt"
 
 .PHONY: publish
 publish:
 	docker build . --tag=$(DOCKER_IMAGE_NAME)
+
+.PHONY: clear
+clear:
+	rm -rf bin/$(APP_FACTORIZER_CMD_NAME)
+	rm -rf bin/$(APP_GENERATOR_CMD_NAME)
+	rm -rf bin/$(APP_RUNNER_CMD_NAME)
+	rm -rf bin/$(APP_LEXER_CMD_NAME)

@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <map>
 #include <set>
+#include <regex>
 
 using namespace std;
 
@@ -15,6 +16,25 @@ const int MAX_LENGTH_ID = 20;
 const int MAX_LENGTH_INT = 11;
 
 typedef int Matrix[STATES_COUNT][INPUT_SYMBOLS_COUNT];
+
+std::string replaceInString(std::string haystack, std::string old, std::string newValue) {
+  size_t index = 0;
+  while (true) {
+     index = haystack.find(old, index);
+     if (index == std::string::npos) break;
+
+     haystack.replace(index, old.length(), newValue);
+
+     index += old.length() - 1;
+  }
+
+  return haystack;
+}
+
+string normalizeNewLines(const string & value) {
+    auto newValue = value;
+    return replaceInString(newValue, "\\n", "\n");
+}
 
 string TrimBlanks(string const& str) {
   bool letterFlag = false, endFl = false;
@@ -59,96 +79,96 @@ string TrimBlanks(string const& str) {
 
 void FillSymbols(map<char, int>& symb)//ДОБАВИТЬ РАЗДЕЛИТЕЛИ
 {
-  symb.insert(pair('A', 0));
-  symb.insert(pair('B', 1));
-  symb.insert(pair('C', 2));
-  symb.insert(pair('D', 3));
-  symb.insert(pair('E', 4));
-  symb.insert(pair('F', 5));
-  symb.insert(pair('G', 6));
-  symb.insert(pair('H', 7));
-  symb.insert(pair('I', 8));
-  symb.insert(pair('J', 9));
-  symb.insert(pair('K', 10));
-  symb.insert(pair('L', 11));
-  symb.insert(pair('M', 12));
-  symb.insert(pair('N', 13));
-  symb.insert(pair('O', 14));
-  symb.insert(pair('P', 15));
-  symb.insert(pair('Q', 16));
-  symb.insert(pair('R', 17));
-  symb.insert(pair('S', 18));
-  symb.insert(pair('T', 19));
-  symb.insert(pair('U', 20));
-  symb.insert(pair('V', 21));
-  symb.insert(pair('W', 22));
-  symb.insert(pair('X', 23));
-  symb.insert(pair('Y', 24));
-  symb.insert(pair('Z', 25));
+  symb.insert(pair<char, int>('A', 0));
+  symb.insert(pair<char, int>('B', 1));
+  symb.insert(pair<char, int>('C', 2));
+  symb.insert(pair<char, int>('D', 3));
+  symb.insert(pair<char, int>('E', 4));
+  symb.insert(pair<char, int>('F', 5));
+  symb.insert(pair<char, int>('G', 6));
+  symb.insert(pair<char, int>('H', 7));
+  symb.insert(pair<char, int>('I', 8));
+  symb.insert(pair<char, int>('J', 9));
+  symb.insert(pair<char, int>('K', 10));
+  symb.insert(pair<char, int>('L', 11));
+  symb.insert(pair<char, int>('M', 12));
+  symb.insert(pair<char, int>('N', 13));
+  symb.insert(pair<char, int>('O', 14));
+  symb.insert(pair<char, int>('P', 15));
+  symb.insert(pair<char, int>('Q', 16));
+  symb.insert(pair<char, int>('R', 17));
+  symb.insert(pair<char, int>('S', 18));
+  symb.insert(pair<char, int>('T', 19));
+  symb.insert(pair<char, int>('U', 20));
+  symb.insert(pair<char, int>('V', 21));
+  symb.insert(pair<char, int>('W', 22));
+  symb.insert(pair<char, int>('X', 23));
+  symb.insert(pair<char, int>('Y', 24));
+  symb.insert(pair<char, int>('Z', 25));
 
-  symb.insert(pair('a', 26));
-  symb.insert(pair('b', 27));
-  symb.insert(pair('c', 28));
-  symb.insert(pair('d', 29));
-  symb.insert(pair('e', 30));
-  symb.insert(pair('f', 31));
-  symb.insert(pair('g', 32));
-  symb.insert(pair('h', 33));
-  symb.insert(pair('i', 34));
-  symb.insert(pair('j', 35));
-  symb.insert(pair('k', 36));
-  symb.insert(pair('l', 37));
-  symb.insert(pair('m', 38));
-  symb.insert(pair('n', 39));
-  symb.insert(pair('o', 40));
-  symb.insert(pair('p', 41));
-  symb.insert(pair('q', 42));
-  symb.insert(pair('r', 43));
-  symb.insert(pair('s', 44));
-  symb.insert(pair('t', 45));
-  symb.insert(pair('u', 46));
-  symb.insert(pair('v', 47));
-  symb.insert(pair('w', 48));
-  symb.insert(pair('x', 49));
-  symb.insert(pair('y', 50));
-  symb.insert(pair('z', 51));
+  symb.insert(pair<char, int>('a', 26));
+  symb.insert(pair<char, int>('b', 27));
+  symb.insert(pair<char, int>('c', 28));
+  symb.insert(pair<char, int>('d', 29));
+  symb.insert(pair<char, int>('e', 30));
+  symb.insert(pair<char, int>('f', 31));
+  symb.insert(pair<char, int>('g', 32));
+  symb.insert(pair<char, int>('h', 33));
+  symb.insert(pair<char, int>('i', 34));
+  symb.insert(pair<char, int>('j', 35));
+  symb.insert(pair<char, int>('k', 36));
+  symb.insert(pair<char, int>('l', 37));
+  symb.insert(pair<char, int>('m', 38));
+  symb.insert(pair<char, int>('n', 39));
+  symb.insert(pair<char, int>('o', 40));
+  symb.insert(pair<char, int>('p', 41));
+  symb.insert(pair<char, int>('q', 42));
+  symb.insert(pair<char, int>('r', 43));
+  symb.insert(pair<char, int>('s', 44));
+  symb.insert(pair<char, int>('t', 45));
+  symb.insert(pair<char, int>('u', 46));
+  symb.insert(pair<char, int>('v', 47));
+  symb.insert(pair<char, int>('w', 48));
+  symb.insert(pair<char, int>('x', 49));
+  symb.insert(pair<char, int>('y', 50));
+  symb.insert(pair<char, int>('z', 51));
   
-  symb.insert(pair('0', 52));
-  symb.insert(pair('1', 53));
-  symb.insert(pair('2', 54));
-  symb.insert(pair('3', 55));
-  symb.insert(pair('4', 56));
-  symb.insert(pair('5', 57));
-  symb.insert(pair('6', 58));
-  symb.insert(pair('7', 59));
-  symb.insert(pair('8', 60));
-  symb.insert(pair('9', 61));
+  symb.insert(pair<char, int>('0', 52));
+  symb.insert(pair<char, int>('1', 53));
+  symb.insert(pair<char, int>('2', 54));
+  symb.insert(pair<char, int>('3', 55));
+  symb.insert(pair<char, int>('4', 56));
+  symb.insert(pair<char, int>('5', 57));
+  symb.insert(pair<char, int>('6', 58));
+  symb.insert(pair<char, int>('7', 59));
+  symb.insert(pair<char, int>('8', 60));
+  symb.insert(pair<char, int>('9', 61));
 
-  symb.insert(pair('_', 62));
-  symb.insert(pair(' ', 63));
-  symb.insert(pair(';', 64));
-  symb.insert(pair('(', 65));
-  symb.insert(pair(')', 66));
-  symb.insert(pair('{', 67));
-  symb.insert(pair('}', 68));
-  symb.insert(pair('\n', 69));
-  symb.insert(pair(',', 70));
+  symb.insert(pair<char, int>('_', 62));
+  symb.insert(pair<char, int>(' ', 63));
+  symb.insert(pair<char, int>(';', 64));
+  symb.insert(pair<char, int>('(', 65));
+  symb.insert(pair<char, int>(')', 66));
+  symb.insert(pair<char, int>('{', 67));
+  symb.insert(pair<char, int>('}', 68));
+  symb.insert(pair<char, int>('\n', 69));
+  symb.insert(pair<char, int>(',', 70));
 
-  symb.insert(pair('/', 71));
-  symb.insert(pair('*', 72));
-  symb.insert(pair('+', 73));
-  symb.insert(pair('-', 74));
+  symb.insert(pair<char, int>('/', 71));
+  symb.insert(pair<char, int>('*', 72));
+  symb.insert(pair<char, int>('+', 73));
+  symb.insert(pair<char, int>('-', 74));
   
-  symb.insert(pair('=', 75));
-  symb.insert(pair('<', 76));
-  symb.insert(pair('>', 77));
+  symb.insert(pair<char, int>('=', 75));
+  symb.insert(pair<char, int>('<', 76));
+  symb.insert(pair<char, int>('>', 77));
 
-  symb.insert(pair('.', 78));
+  symb.insert(pair<char, int>('.', 78));
   
-  symb.insert(pair('[', 79));
-  symb.insert(pair(']', 80));
+  symb.insert(pair<char, int>('[', 79));
+  symb.insert(pair<char, int>(']', 80));
 
-  symb.insert(pair('"', 81));
+  symb.insert(pair<char, int>('"', 81));
 }
 
 void FillSpecial(set<char>& special)
@@ -669,130 +689,140 @@ void FillMatrix(Matrix& mat)
 
 void FillStates(map<int, string>& states)
 {
-  states.insert(pair(0, "start"));
+  states.insert(pair<int, string>(0, "start"));
 
-  states.insert(pair(1, "i"));
-  states.insert(pair(2, "in"));
-  states.insert(pair(3, "int"));
+  states.insert(pair<int, string>(1, "i"));
+  states.insert(pair<int, string>(2, "in"));
+  states.insert(pair<int, string>(3, "int"));
   
-  states.insert(pair(8, "if"));
-  states.insert(pair(9, "creatingId"));
+  states.insert(pair<int, string>(8, "if"));
+  states.insert(pair<int, string>(9, "creatingId"));
 
-  states.insert(pair(10, "d"));
-  states.insert(pair(11, "db"));
-  states.insert(pair(12, "dbl"));
+  states.insert(pair<int, string>(10, "d"));
+  states.insert(pair<int, string>(11, "db"));
+  states.insert(pair<int, string>(12, "dbl"));
 
-  states.insert(pair(13, "f"));
-  states.insert(pair(14, "fl"));
-  states.insert(pair(15, "flo"));
+  states.insert(pair<int, string>(13, "f"));
+  states.insert(pair<int, string>(14, "fl"));
+  states.insert(pair<int, string>(15, "flo"));
 
-  states.insert(pair(16, "fo"));
-  states.insert(pair(17, "for"));
+  states.insert(pair<int, string>(16, "fo"));
+  states.insert(pair<int, string>(17, "for"));
 
-  states.insert(pair(18, "e"));
-  states.insert(pair(19, "el"));
-  states.insert(pair(20, "els"));
-  states.insert(pair(21, "else"));
+  states.insert(pair<int, string>(18, "e"));
+  states.insert(pair<int, string>(19, "el"));
+  states.insert(pair<int, string>(20, "els"));
+  states.insert(pair<int, string>(21, "else"));
   
-  states.insert(pair(22, "eli"));
-  states.insert(pair(23, "elif"));
+  states.insert(pair<int, string>(22, "eli"));
+  states.insert(pair<int, string>(23, "elif"));
   
-  states.insert(pair(24, "m"));
-  states.insert(pair(25, "ma"));
-  states.insert(pair(26, "mai"));
-  states.insert(pair(27, "main"));
+  states.insert(pair<int, string>(24, "m"));
+  states.insert(pair<int, string>(25, "ma"));
+  states.insert(pair<int, string>(26, "mai"));
+  states.insert(pair<int, string>(27, "main"));
   
-  states.insert(pair(28, "w"));
-  states.insert(pair(29, "wh"));
-  states.insert(pair(30, "whi"));
-  states.insert(pair(31, "whil"));
-  states.insert(pair(32, "while"));
+  states.insert(pair<int, string>(28, "w"));
+  states.insert(pair<int, string>(29, "wh"));
+  states.insert(pair<int, string>(30, "whi"));
+  states.insert(pair<int, string>(31, "whil"));
+  states.insert(pair<int, string>(32, "while"));
 
-  states.insert(pair(33, "wr"));
-  states.insert(pair(34, "wri"));
-  states.insert(pair(35, "writ"));
-  states.insert(pair(36, "write"));
+  states.insert(pair<int, string>(33, "wr"));
+  states.insert(pair<int, string>(34, "wri"));
+  states.insert(pair<int, string>(35, "writ"));
+  states.insert(pair<int, string>(36, "write"));
   
-  states.insert(pair(37, "r"));
-  states.insert(pair(38, "re"));
-  states.insert(pair(39, "rea"));
-  states.insert(pair(40, "read"));
+  states.insert(pair<int, string>(37, "r"));
+  states.insert(pair<int, string>(38, "re"));
+  states.insert(pair<int, string>(39, "rea"));
+  states.insert(pair<int, string>(40, "read"));
   
-  states.insert(pair(41, "creatingInt"));
-  states.insert(pair(42, "creatingFloat"));
+  states.insert(pair<int, string>(41, "creatingInt"));
+  states.insert(pair<int, string>(42, "creatingFloat"));
   
-  states.insert(pair(43, "integer"));
-  states.insert(pair(44, "float"));
+  states.insert(pair<int, string>(43, "integer"));
+  states.insert(pair<int, string>(44, "float"));
 
-  states.insert(pair(45, "creatingError"));
+  states.insert(pair<int, string>(45, "creatingError"));
 
-  states.insert(pair(46, "addition"));
-  states.insert(pair(47, "subtraction"));
-  states.insert(pair(48, "division"));
-  states.insert(pair(49, "multiplication"));
-  states.insert(pair(50, "appropriation"));
-  states.insert(pair(51, "comparison"));
+  states.insert(pair<int, string>(46, "addition"));
+  states.insert(pair<int, string>(47, "subtraction"));
+  states.insert(pair<int, string>(48, "division"));
+  states.insert(pair<int, string>(49, "multiplication"));
+  states.insert(pair<int, string>(50, "appropriation"));
+  states.insert(pair<int, string>(51, "comparison"));
 
-  states.insert(pair(52, "creatingComparison"));
-  states.insert(pair(53, "creatingComparison2"));
+  states.insert(pair<int, string>(52, "creatingComparison"));
+  states.insert(pair<int, string>(53, "creatingComparison2"));
 
-  states.insert(pair(54, "creatingAppropriation"));
+  states.insert(pair<int, string>(54, "creatingAppropriation"));
 
-  states.insert(pair(55, "openParenthesis"));
-  states.insert(pair(56, "closingParenthesis"));
+  states.insert(pair<int, string>(55, "openParenthesis"));
+  states.insert(pair<int, string>(56, "closingParenthesis"));
   
-  states.insert(pair(57, "creatingComment"));
-  states.insert(pair(58, "creatingOneLineComment2"));
-  states.insert(pair(59, "oneLineComment"));
-  states.insert(pair(60, "creatingManyLineComment2"));
+  states.insert(pair<int, string>(57, "creatingComment"));
+  states.insert(pair<int, string>(58, "creatingOneLineComment2"));
+  states.insert(pair<int, string>(59, "oneLineComment"));
+  states.insert(pair<int, string>(60, "creatingManyLineComment2"));
 
-  states.insert(pair(61, "zero"));
-  states.insert(pair(62, "creatingHexadecimal1"));
-  states.insert(pair(63, "creatingHexadecimal2"));
-  states.insert(pair(64, "creatingHexadecimal3"));
-  states.insert(pair(65, "hexadecimal"));
+  states.insert(pair<int, string>(61, "zero"));
+  states.insert(pair<int, string>(62, "creatingHexadecimal1"));
+  states.insert(pair<int, string>(63, "creatingHexadecimal2"));
+  states.insert(pair<int, string>(64, "creatingHexadecimal3"));
+  states.insert(pair<int, string>(65, "hexadecimal"));
 
-  states.insert(pair(66, "openManyLineComment"));
-  states.insert(pair(67, "findingEndOfManyLineComment"));
-  states.insert(pair(68, "creatingEndManyLineComment"));
-  states.insert(pair(69, "creatingEndManyLineComment2"));
-  states.insert(pair(70, "manyLineComment"));
+  states.insert(pair<int, string>(66, "openManyLineComment"));
+  states.insert(pair<int, string>(67, "findingEndOfManyLineComment"));
+  states.insert(pair<int, string>(68, "creatingEndManyLineComment"));
+  states.insert(pair<int, string>(69, "creatingEndManyLineComment2"));
+  states.insert(pair<int, string>(70, "manyLineComment"));
 
-  states.insert(pair(71, "point"));
+  states.insert(pair<int, string>(71, "point"));
 
-  states.insert(pair(72, "exponentStart"));
-  states.insert(pair(73, "exponentSign"));
-  states.insert(pair(74, "exponent1"));
-  states.insert(pair(75, "exponent2"));
+  states.insert(pair<int, string>(72, "exponentStart"));
+  states.insert(pair<int, string>(73, "exponentSign"));
+  states.insert(pair<int, string>(74, "exponent1"));
+  states.insert(pair<int, string>(75, "exponent2"));
   
-  states.insert(pair(76, "stringStart"));
-  states.insert(pair(77, "creatingString"));
-  states.insert(pair(78, "stringEnd"));
-  states.insert(pair(79, "string"));
+  states.insert(pair<int, string>(76, "stringStart"));
+  states.insert(pair<int, string>(77, "creatingString"));
+  states.insert(pair<int, string>(78, "stringEnd"));
+  states.insert(pair<int, string>(79, "string"));
 
-  states.insert(pair(80, "t"));
-  states.insert(pair(81, "tr"));
-  states.insert(pair(82, "tru"));
-  states.insert(pair(83, "true"));
+  states.insert(pair<int, string>(80, "t"));
+  states.insert(pair<int, string>(81, "tr"));
+  states.insert(pair<int, string>(82, "tru"));
+  states.insert(pair<int, string>(83, "true"));
 
-  states.insert(pair(84, "b"));
-  states.insert(pair(85, "bo"));
-  states.insert(pair(86, "boo"));
-  states.insert(pair(87, "bool"));
+  states.insert(pair<int, string>(84, "b"));
+  states.insert(pair<int, string>(85, "bo"));
+  states.insert(pair<int, string>(86, "boo"));
+  states.insert(pair<int, string>(87, "bool"));
 
-  states.insert(pair(88, "fa"));
-  states.insert(pair(89, "fal"));
-  states.insert(pair(90, "fals"));
-  states.insert(pair(91, "false"));
+  states.insert(pair<int, string>(88, "fa"));
+  states.insert(pair<int, string>(89, "fal"));
+  states.insert(pair<int, string>(90, "fals"));
+  states.insert(pair<int, string>(91, "false"));
   
-  states.insert(pair(92, "s"));
-  states.insert(pair(93, "st"));
-  states.insert(pair(94, "str"));
+  states.insert(pair<int, string>(92, "s"));
+  states.insert(pair<int, string>(93, "st"));
+  states.insert(pair<int, string>(94, "str"));
 
-  states.insert(pair(4, "keyword"));
-  states.insert(pair(5, "id"));
-  states.insert(pair(6, "error"));
-  states.insert(pair(7, "separator"));
+  states.insert(pair<int, string>(4, "keyword"));
+  states.insert(pair<int, string>(5, "id"));
+  states.insert(pair<int, string>(6, "error"));
+  states.insert(pair<int, string>(7, "separator"));
+}
+
+string initModule() {
+    cout << "PING" << std::endl;
+
+    string content;
+
+    getline(cin, content);
+
+    return normalizeNewLines(content);
 }
 
 int main() {
@@ -803,11 +833,6 @@ int main() {
 
   FillSymbols(symbols);
   FillSpecial(special);
-
-  ifstream input;
-  ofstream output;
-  input.open("input.txt");
-  output.open("output.txt");
 
   int state = 0, inputSymb;//СТРОКА И СТОЛБЕЦ В МАТРИЦЕ ПЕРЕХОДОВ 
 
@@ -830,8 +855,25 @@ int main() {
 
   int stringNum = 1;
   int lengthCounter;
+
+  // init module
+
+  auto content = initModule();
+
+  istringstream input;
+  input.str(content);
+
+  // used to receive signal from host process
+  string flush;
+
+  string separator = "|-|";
+
+  // init module
+
+
   while(getline(input, stringToTrim))
-  { 
+  {
+    getline(cin, flush);
     currStr = TrimBlanks(stringToTrim);
     string word;
     // if(!input.eof()) ВОЗМОЖНО НАДО БУДЕТ ВЕРНУТЬ ЭТУ ПРОВЕРКУ ОБРАТНО 
@@ -883,7 +925,7 @@ int main() {
             int commLength = comment.length();
             comment.erase(commLength-1, commLength);
 
-            cout << stateIt->second << "(" << stringNum << ", " << i + 1 - word.length() << ") - " << comment << endl;            
+            cout << stateIt->second << " " << stringNum << " " << i + 1 - word.length() << separator << comment << endl;
             break;
           }
 
@@ -930,7 +972,7 @@ int main() {
           }
 
           if(word != "")
-            cout << stateIt->second << "(" << stringNum << ", " << i + 1 - word.length() << ") - " << word << endl;
+            cout << stateIt->second << " " << stringNum << " " << i + 1 - word.length() << separator << word << endl;
 
           state = 0;
           specialIterator = special.find(currStr[i]);
@@ -941,7 +983,7 @@ int main() {
           {
             state = matrix[state][inputSymb];
             stateIt = states.find(state);
-            cout << stateIt->second << "(" << stringNum << ", " << i + 1 << ") - " << currStr[i] << endl;
+            cout << stateIt->second << " " << stringNum << " " << i + 1 << separator << currStr[i] << endl;
             state = 0;
           }
           else
@@ -975,7 +1017,6 @@ int main() {
       }
     }
 
-    output << currStr;
     ++stringNum;
   }
 

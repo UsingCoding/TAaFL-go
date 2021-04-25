@@ -27,8 +27,6 @@ func (i *inStream) Write(data string) error {
 }
 
 func (i *inStream) Read(p []byte) (n int, err error) {
-	fmt.Println("READ REQUEST")
-
 	if i.isEOF {
 		return 0, io.EOF
 	}
@@ -36,8 +34,6 @@ func (i *inStream) Read(p []byte) (n int, err error) {
 	i.hasProducer = true
 
 	data := <-i.channel
-
-	fmt.Println("RECEIVED FROM CHANNEL")
 
 	i.hasProducer = false
 
@@ -65,8 +61,6 @@ func (o *outStream) Read() string {
 }
 
 func (o *outStream) Write(p []byte) (n int, err error) {
-	fmt.Println("From process:", string(p))
-
 	if !o.hasListener {
 		fmt.Println("No listener for output")
 		return len(p), nil

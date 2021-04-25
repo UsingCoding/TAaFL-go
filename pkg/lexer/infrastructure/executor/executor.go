@@ -1,6 +1,7 @@
 package executor
 
 import (
+	"github.com/pkg/errors"
 	"io"
 	"os/exec"
 	"strings"
@@ -10,6 +11,7 @@ type LexerRuntime interface {
 	Start() error
 	Write(data string) error
 	Flush() (string, error)
+	IsClosed() bool
 	io.Closer
 }
 
@@ -35,6 +37,7 @@ func NewLexerExecutor(lexerExecutablePath string) LexerRuntime {
 
 type lexerExecutor struct {
 	lexerProcess exec.Cmd
+	isClosed     bool
 	stdin        *inStream
 	stdout       *outStream
 }
@@ -55,6 +58,9 @@ func (executor *lexerExecutor) Write(data string) error {
 }
 
 func (executor *lexerExecutor) Flush() (string, error) {
+	if executor.isClosed {
+		return "", errors.New("flush in closed runtime")
+	}
 	err := executor.stdin.Write("! !")
 	if err != nil {
 		return "", err
@@ -66,7 +72,12 @@ func (executor *lexerExecutor) Flush() (string, error) {
 }
 
 func (executor *lexerExecutor) Close() error {
+	executor.isClosed = true
 	return executor.lexerProcess.Process.Kill()
+}
+
+func (executor *lexerExecutor) IsClosed() bool {
+	return executor.isClosed
 }
 
 func escapeNewLines(data string) string {

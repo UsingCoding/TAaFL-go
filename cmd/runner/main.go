@@ -2,63 +2,75 @@ package main
 
 import (
 	"compiler/pkg/common/lexer"
+	"compiler/pkg/lexer/infrastructure"
+	lexerexecutor "compiler/pkg/lexer/infrastructure/executor"
 	"fmt"
+	"io/ioutil"
+	"log"
 )
 
 func main() {
-	err := runModule()
+	config, err := parseConfig()
 	if err != nil {
-		fmt.Println(err)
+		log.Fatalf("Parse config failed %s", err.Error())
+	}
+
+	rawData, err := getFileData(config.InputProgramFilePath)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+	lexerImpl, err := initLexer(config, rawData)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+	defer lexerImpl.Close()
+
+	err = runModule(lexerImpl)
+	if err != nil {
+		log.Fatal(err)
 	}
 }
 
-func runModule() error {
-	lexerImpl := newMockLexer()
-
+func runModule(lexerImpl lexer.Lexer) error {
 	for {
 		lexem, err := lexerImpl.FetchLexem()
 		if err != nil {
-			if err == lexer.ErrEOF {
-				fmt.Println("program ends")
-				return nil
-			}
 			return err
 		}
-		if lexem.Type == lexer.LexemTypeError {
+		if lexem.Type == lexer.LexemTypeEOF {
+			fmt.Println("program ends")
 			break
 		}
 
-		// do business with your lexem
+		fmt.Println("LEXEM:", lexem)
 	}
 
 	return nil
 }
 
-func newMockLexer() lexer.Lexer {
-	return &mockLexer{lexems: []lexer.Lexem{
-		{
-			Type:     lexer.LexemTypeKeyword,
-			Value:    "var",
-			Line:     10,
-			Position: 20,
-		},
-		{
-			Type:     lexer.LexemTypeError,
-			Value:    "kek",
-			Line:     10,
-			Position: 20,
-		},
-	}}
-}
+func initLexer(config *config, rawProgram string) (infrastructure.LexerAdapter, error) {
+	executor := lexerexecutor.NewLexerExecutor(config.LexerExecutablePath)
 
-type mockLexer struct {
-	lexems    []lexer.Lexem
-	iterCount int
-}
-
-func (m *mockLexer) FetchLexem() (lexer.Lexem, error) {
-	if m.iterCount == len(m.lexems) {
-		return lexer.Lexem{}, lexer.ErrEOF
+	err := executor.Start()
+	if err != nil {
+		return nil, err
 	}
-	return m.lexems[m.iterCount], nil
+
+	err = executor.Write(rawProgram)
+	if err != nil {
+		return nil, err
+	}
+
+	return infrastructure.NewLexerAdapter(executor), nil
+}
+
+func getFileData(path string) (string, error) {
+	bytes, err := ioutil.ReadFile(path)
+	if err != nil {
+		return "", err
+	}
+
+	return string(bytes), nil
 }
