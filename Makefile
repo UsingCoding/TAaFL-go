@@ -4,7 +4,7 @@ export APP_RUNNER_CMD_NAME = runner
 export APP_LEXER_CMD_NAME = lexer
 export DOCKER_IMAGE_NAME = vadimmakerov/$(APP_CMD_NAME):master
 
-all: build check test
+all: build test
 
 .PHONY: build
 build: modules
@@ -47,3 +47,7 @@ clear:
 	rm -rf bin/$(APP_GENERATOR_CMD_NAME)
 	rm -rf bin/$(APP_RUNNER_CMD_NAME)
 	rm -rf bin/$(APP_LEXER_CMD_NAME)
+
+.PHONY: build-dproxy
+build-dproxy:
+	docker build . -f Dockerfile.proxy --tag=vadimmakerov/builder-docker-proxy
