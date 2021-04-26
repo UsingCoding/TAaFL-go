@@ -1,16 +1,22 @@
 package lexer
 
-import "errors"
-
 type LexemType string
 
 const (
 	LexemTypeKeyword LexemType = "keyword"
-	LexemTypeError             = "error"
+	LexemTypeInteger LexemType = "integer"
+	LexemTypeFloat   LexemType = "float"
+	LexemTypeError   LexemType = "error"
+	LexemTypeEOF     LexemType = "eof"
 )
 
 var (
-	ErrEOF = errors.New("end of lexems")
+	KnownLexemTypes = []LexemType{
+		LexemTypeKeyword,
+		LexemTypeInteger,
+		LexemTypeFloat,
+		LexemTypeError,
+	}
 )
 
 type Lexem struct {

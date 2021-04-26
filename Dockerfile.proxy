@@ -1,0 +1,12 @@
+FROM golang:1.16.3-stretch
+
+RUN echo "deb http://archive.ubuntu.com/ubuntu bionic main multiverse restricted universe" >> /etc/apt/sources.list && \
+    echo "deb http://archive.ubuntu.com/ubuntu bionic-security main multiverse restricted universe" >> /etc/apt/sources.list && \
+    echo "deb http://archive.ubuntu.com/ubuntu bionic-updates main multiverse restricted universe" >> /etc/apt/sources.list
+
+RUN apt-get update && \
+    apt-get install -y --allow-unauthenticated make clang-6.0
+
+WORKDIR /app
+
+ENTRYPOINT make
