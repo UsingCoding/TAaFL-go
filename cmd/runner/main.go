@@ -1,9 +1,12 @@
 package main
 
 import (
+	"compiler/pkg/common/grammary"
 	"compiler/pkg/common/lexer"
+	appgenerator "compiler/pkg/generator/app"
 	"compiler/pkg/lexer/infrastructure"
 	lexerexecutor "compiler/pkg/lexer/infrastructure/executor"
+	"compiler/pkg/runner/app"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -15,39 +18,61 @@ func main() {
 		log.Fatalf("Parse config failed %s", err.Error())
 	}
 
-	rawData, err := getFileData(config.InputProgramFilePath)
+	grammar, err := initGrammar(config.GrammarFilePath)
+	if err != nil {
+		log.Fatalf("Parse grammar failed %s", err.Error())
+	}
+
+	program, err := getFileData(config.InputProgramFilePath)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 
-	lexerImpl, err := initLexer(config, rawData)
+	lexerImpl, err := initLexer(config, program)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 
 	defer lexerImpl.Close()
 
-	err = runModule(lexerImpl)
+	err = runModule(grammar, lexerImpl)
 	if err != nil {
 		log.Fatal(err)
 	}
 }
 
-func runModule(lexerImpl lexer.Lexer) error {
-	for {
-		lexem, err := lexerImpl.FetchLexem()
-		if err != nil {
-			return err
-		}
-		if lexem.Type == lexer.LexemTypeEOF {
-			fmt.Println("program ends")
-			break
-		}
+func runModule(grammar grammary.Grammar, lexerImpl lexer.Lexer) error {
+	serializer := grammary.NewSerializer()
 
-		fmt.Println("LEXEM:", lexem)
+	serializedGrammar, err := serializer.SerializeGrammar(grammar)
+	if err != nil {
+		return err
+	}
+
+	leftParts, rightParts := appgenerator.CreateTables(serializedGrammar)
+
+	isMatched, err := app.Runner(leftParts, rightParts, lexerImpl)
+	if err != nil {
+		return err
+	}
+
+	msg := "Program text is %s\n"
+
+	if isMatched {
+		fmt.Printf(msg, "matched")
+	} else {
+		fmt.Printf(msg, "not matched")
 	}
 
 	return nil
+}
+
+func initGrammar(path string) (grammary.Grammar, error) {
+	data, err := getFileData(path)
+	if err != nil {
+		return grammary.Grammar{}, err
+	}
+	return grammary.Parse(data)
 }
 
 func initLexer(config *config, rawProgram string) (infrastructure.LexerAdapter, error) {

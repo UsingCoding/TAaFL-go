@@ -6,22 +6,24 @@ import (
 )
 
 type config struct {
+	GrammarFilePath      string
 	LexerExecutablePath  string
 	InputProgramFilePath string
 }
 
 func parseConfig() (*config, error) {
 	lexerPath := flag.String("l", "", "Lexer executable path")
-	inputProgrammPath := flag.String("f", "", "Input programm path")
+	inputProgramPath := flag.String("f", "", "Input program path")
+	grammarFilePath := flag.String("g", "", "Grammar file path")
 
 	flag.Parse()
 
-	if *lexerPath == "" || *inputProgrammPath == "" {
+	if *lexerPath == "" || *inputProgramPath == "" || *grammarFilePath == "" {
 		return nil, errors.New("some of flags is missed")
 	}
 
 	return &config{
 		LexerExecutablePath:  *lexerPath,
-		InputProgramFilePath: *inputProgrammPath,
+		InputProgramFilePath: *inputProgramPath,
 	}, nil
 }
