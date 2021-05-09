@@ -13,7 +13,7 @@ type config struct {
 
 func parseConfig() (*config, error) {
 	lexerPath := flag.String("l", "", "Lexer executable path")
-	inputProgramPath := flag.String("f", "", "Input program path")
+	inputProgramPath := flag.String("i", "", "Input program path")
 	grammarFilePath := flag.String("g", "", "Grammar file path")
 
 	flag.Parse()
