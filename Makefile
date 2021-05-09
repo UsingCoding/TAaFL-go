@@ -35,7 +35,7 @@ run-generator:
 
 .PHONY: run-runner
 run-runner:
-	bin/$(APP_RUNNER_CMD_NAME) "-l" "bin/$(APP_LEXER_CMD_NAME)" "-f" "data/runner/example.txt"
+	bin/$(APP_RUNNER_CMD_NAME) "-l" "bin/$(APP_LEXER_CMD_NAME)" "-f" "data/LL(1)/grammar" "-g" "data/LL(1)/program"
 
 .PHONY: publish
 publish:
