@@ -10,7 +10,7 @@
 
 using namespace std;
 
-const int STATES_COUNT = 100;
+const int STATES_COUNT = 125;
 const int INPUT_SYMBOLS_COUNT = 85;
 const int MAX_LENGTH_ID = 20;
 const int MAX_LENGTH_INT = 11;
@@ -195,6 +195,12 @@ void FillMatrix(Matrix& mat)
   {
     3, 8, 12, 15, 17, 21, 23, 27, 32, 36, 40, 83, 87, 91, 94
   };
+
+  vector<int> FinalTokenStates //Вместо ключевых слов
+  {
+    95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109
+  };
+
 
   // ЗАПОЛНЕНИЕ МАТРИЦЫ ПЕРЕХОДОВ ДЛЯ АВТОМАТА
   for(int i = 0; i < STATES_COUNT; ++i)
@@ -602,23 +608,23 @@ void FillMatrix(Matrix& mat)
 
   for(int i = 0; i < preFinalStates.size(); ++i) // word -> keyword
   {
-    mat[preFinalStates[i]][63] = 4; // keyword
-    mat[preFinalStates[i]][64] = 4;
-    mat[preFinalStates[i]][69] = 4;
-    mat[preFinalStates[i]][73] = 4; // keyword+
-    mat[preFinalStates[i]][74] = 4; // keyword-
-    mat[preFinalStates[i]][72] = 4; // keyword/
-    mat[preFinalStates[i]][71] = 4; // keyword*  
-    mat[preFinalStates[i]][77] = 4;
-    mat[preFinalStates[i]][76] = 4;
-    mat[preFinalStates[i]][75] = 4;
-    mat[preFinalStates[i]][65] = 4; 
-    mat[preFinalStates[i]][67] = 4; 
-    mat[preFinalStates[i]][66] = 4; 
-    mat[preFinalStates[i]][68] = 4;
-    mat[preFinalStates[i]][79] = 4; 
-    mat[preFinalStates[i]][80] = 4; 
-    mat[preFinalStates[i]][81] = 4;   
+    mat[preFinalStates[i]][63] = FinalTokenStates[i]; // keyword
+    mat[preFinalStates[i]][64] = FinalTokenStates[i];
+    mat[preFinalStates[i]][69] = FinalTokenStates[i];
+    mat[preFinalStates[i]][73] = FinalTokenStates[i]; // keyword+
+    mat[preFinalStates[i]][74] = FinalTokenStates[i]; // keyword-
+    mat[preFinalStates[i]][72] = FinalTokenStates[i]; // keyword/
+    mat[preFinalStates[i]][71] = FinalTokenStates[i]; // keyword*  
+    mat[preFinalStates[i]][77] = FinalTokenStates[i];
+    mat[preFinalStates[i]][76] = FinalTokenStates[i];
+    mat[preFinalStates[i]][75] = FinalTokenStates[i];
+    mat[preFinalStates[i]][65] = FinalTokenStates[i]; 
+    mat[preFinalStates[i]][67] = FinalTokenStates[i]; 
+    mat[preFinalStates[i]][66] = FinalTokenStates[i]; 
+    mat[preFinalStates[i]][68] = FinalTokenStates[i];
+    mat[preFinalStates[i]][79] = FinalTokenStates[i]; 
+    mat[preFinalStates[i]][80] = FinalTokenStates[i]; 
+    mat[preFinalStates[i]][81] = FinalTokenStates[i];   
   }
 
   for(int i = 0; i < INPUT_SYMBOLS_COUNT; ++i)
@@ -809,6 +815,22 @@ void FillStates(map<int, string>& states)
   states.insert(pair<int, string>(93, "st"));
   states.insert(pair<int, string>(94, "str"));
 
+  states.insert(pair(95, "intToken"));
+  states.insert(pair(96, "ifToken"));
+  states.insert(pair(97, "dblToken"));
+  states.insert(pair(98, "floToken"));
+  states.insert(pair(99, "forToken"));
+  states.insert(pair(100, "elseToken"));
+  states.insert(pair(101, "elifToken"));
+  states.insert(pair(102, "mainToken"));
+  states.insert(pair(103, "whileToken"));
+  states.insert(pair(104, "writeToken"));
+  states.insert(pair(105, "readToken"));
+  states.insert(pair(106, "trueToken"));
+  states.insert(pair(107, "boolToken"));
+  states.insert(pair(108, "falseToken"));
+  states.insert(pair(109, "strToken"));
+
   states.insert(pair<int, string>(4, "keyword"));
   states.insert(pair<int, string>(5, "id"));
   states.insert(pair<int, string>(6, "error"));
@@ -841,7 +863,8 @@ int main() {
 
   vector<int> finalStates
   {
-    4, 5, 6, 7, 43, 44, 46, 47, 48, 49, 50, 51, 55, 56, 59, 65, 66, 67, 68, 69, 70, 76, 77, 79
+    4, 5, 6, 7, 43, 44, 46, 47, 48, 49, 50, 51, 55, 56, 59, 65, 66, 67, 68, 69, 70, 76, 77, 79,
+    95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109
   };
 
   Matrix matrix;
