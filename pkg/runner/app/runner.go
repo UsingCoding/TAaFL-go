@@ -19,10 +19,14 @@ func Runner(leftParts, rightParts [][]string, lexer lexer.Lexer) (bool, error) {
 	var stack []int
 
 	for word.Value != "eof" {
+		fmt.Println("INF", word.Value)
 		for i := ptrToLeft; i < len(leftParts); i++ {
 			if symbol == leftParts[i][0] {
 				if strings.Contains(leftParts[i][1], word.Value) {
-					ptrToRight, _ = strconv.Atoi(leftParts[i][2])
+					ptrToRight, err = strconv.Atoi(leftParts[i][2])
+					if err != nil {
+						return false, err
+					}
 					break
 				} else if leftParts[i][3] == strconv.Itoa(1) {
 					return false, nil
@@ -35,16 +39,20 @@ func Runner(leftParts, rightParts [][]string, lexer lexer.Lexer) (bool, error) {
 		for i := ptrToRight; i < len(rightParts); i++ {
 			if strings.Contains(rightParts[i][1], word.Value) {
 
-				shift, _ := strconv.Atoi(rightParts[i][3])
+				shift, err2 := strconv.Atoi(rightParts[i][3])
+				if err2 != nil {
+					return false, err2
+				}
 				if shift == 1 {
-					word, _ = lexer.FetchLexem()
+					word, err = lexer.FetchLexem()
+					if err != nil {
+						return false, err
+					}
 				}
 
 				if rightParts[i][0] == grammary.EmptySymbol {
 					top := len(stack) - 1
-					// TODO: check possible error
 					ptrToRight = stack[top]
-					// TODO: check possible error
 					symbol = rightParts[stack[top]][0]
 					stack = stack[:top]
 					break
@@ -64,10 +72,16 @@ func Runner(leftParts, rightParts [][]string, lexer lexer.Lexer) (bool, error) {
 				}
 
 				if grammary.IsNonTerminalSymbol(rightParts[i][0]) {
-					ptrToLeft, _ = strconv.Atoi(rightParts[i][2])
+					ptrToLeft, err = strconv.Atoi(rightParts[i][2])
+					if err != nil {
+						return false, err
+					}
 					symbol = rightParts[i][0]
 
-					stackPtr, _ := strconv.Atoi(rightParts[i][4])
+					stackPtr, err2 := strconv.Atoi(rightParts[i][4])
+					if err2 != nil {
+						return false, err2
+					}
 
 					if stackPtr > 0 {
 						stack = append(stack, stackPtr)

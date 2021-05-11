@@ -23,6 +23,7 @@ func parseConfig() (*config, error) {
 	}
 
 	return &config{
+		GrammarFilePath:      *grammarFilePath,
 		LexerExecutablePath:  *lexerPath,
 		InputProgramFilePath: *inputProgramPath,
 	}, nil

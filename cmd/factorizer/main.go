@@ -29,19 +29,11 @@ func runService() error {
 		return err
 	}
 
-	err = app.FactorizeGrammar(grammar)
-	if err != nil {
-		return err
-	}
+	app.RemoveLeftRecursion(grammar)
 
 	grammarSerializer := grammary.NewSerializer()
 
-	grammarWithHeadSequences, err := app.BuildHeadSequencesForGrammar(grammar)
-	if err != nil {
-		return err
-	}
-
-	serializedGrammar, err := grammarSerializer.SerializeGrammar(&grammarWithHeadSequences)
+	serializedGrammar, err := grammarSerializer.SerializeGrammar(&grammar)
 	if err != nil {
 		return err
 	}

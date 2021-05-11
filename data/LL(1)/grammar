@@ -1,7 +1,0 @@
-<S> -> <A> var | <A> warp
-<S> -> <D> let | <D> <A>
-<A> -> sad <C>
-<A> -> glad
-<B> -> nice
-<C> -> e
-<D> -> rice
