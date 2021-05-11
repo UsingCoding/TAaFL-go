@@ -1,6 +1,7 @@
 package grammary
 
 import (
+	"fmt"
 	"github.com/pkg/errors"
 	"regexp"
 	"strings"
@@ -46,14 +47,14 @@ func (g *Grammar) AddRule(ruleLeftSide Symbol, alternatives [][]Symbol) {
 }
 
 func IsNonTerminalSymbol(value string) bool {
-	matched, _ := regexp.MatchString(`<[A-Z]*>`, value)
+	matched, _ := regexp.MatchString(`<[A-Za-z]*>`, value)
 	return matched
 }
 
 func Parse(rawData string) (Grammar, error) {
 	grammar := NewGrammar()
 
-	for _, line := range strings.Split(rawData, "\n") {
+	for lineNumber, line := range strings.Split(rawData, "\n") {
 		// skip comments strings
 		if strings.HasPrefix(line, "#") {
 			continue
@@ -74,7 +75,8 @@ func Parse(rawData string) (Grammar, error) {
 
 			if buffer == RuleSidesSeparator {
 				if leftSideSymbol == nil {
-					return Grammar{}, errors.New("no leftSideSymbol found")
+					fmt.Println(buffer)
+					return Grammar{}, errors.New(fmt.Sprintf("no leftSideSymbol found on line %d", lineNumber+1))
 				}
 
 				if !leftSide {
