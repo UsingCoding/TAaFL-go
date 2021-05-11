@@ -3,19 +3,33 @@ package lexer
 type LexemType string
 
 const (
-	LexemTypeKeyword LexemType = "keyword"
-	LexemTypeInteger LexemType = "integer"
-	LexemTypeFloat   LexemType = "float"
-	LexemTypeError   LexemType = "error"
-	LexemTypeEOF     LexemType = "eof"
+	LexemTypeId                 LexemType = "id"
+	LexemTypeError              LexemType = "error"
+	LexemTypeEOF                LexemType = "eof"
+	LexemTypeComparison         LexemType = "comparison"
+	LexemTypeSubtraction        LexemType = "subtraction"
+	LexemTypeMainToken          LexemType = "mainToken"
+	LexemTypeOpenParenthesis    LexemType = "openParenthesis"
+	LexemTypeClosingParenthesis LexemType = "closingParenthesis"
+	LexemTypeInt                LexemType = "intToken"
+	LexemTypeInteger            LexemType = "integer"
+	LexemTypeAppropriation      LexemType = "appropriation"
+	LexemTypeSeparator          LexemType = "separator"
 )
 
 var (
 	KnownLexemTypes = []LexemType{
-		LexemTypeKeyword,
-		LexemTypeInteger,
-		LexemTypeFloat,
+		LexemTypeId,
 		LexemTypeError,
+		LexemTypeComparison,
+		LexemTypeSubtraction,
+		LexemTypeMainToken,
+		LexemTypeOpenParenthesis,
+		LexemTypeClosingParenthesis,
+		LexemTypeInt,
+		LexemTypeInteger,
+		LexemTypeAppropriation,
+		LexemTypeSeparator,
 	}
 )
 

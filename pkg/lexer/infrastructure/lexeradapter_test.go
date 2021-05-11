@@ -9,15 +9,15 @@ import (
 
 func TestLexerAdapter_FetchLexem(t *testing.T) {
 	adapter := NewLexerAdapter(&mockLexerRuntime{rows: []string{
-		fmt.Sprintf("keyword 1 4%slexem content\nkeyword 2 4%slexem content\n", valueSeparator, valueSeparator),
-		fmt.Sprintf("keyword 5 2%slexem", valueSeparator),
+		fmt.Sprintf("id 1 4%slexem content\nid 2 4%slexem content\n", valueSeparator, valueSeparator),
+		fmt.Sprintf("id 5 2%slexem", valueSeparator),
 	}})
 
 	{
 		lexem, err := adapter.FetchLexem()
 		assert.NoError(t, err)
 
-		assert.Equal(t, lexer.LexemTypeKeyword, lexem.Type)
+		assert.Equal(t, lexer.LexemTypeId, lexem.Type)
 		assert.Equal(t, 1, lexem.Line)
 		assert.Equal(t, 4, lexem.Position)
 		assert.Equal(t, "lexem content", lexem.Value)
@@ -27,7 +27,7 @@ func TestLexerAdapter_FetchLexem(t *testing.T) {
 		lexem, err := adapter.FetchLexem()
 		assert.NoError(t, err)
 
-		assert.Equal(t, lexer.LexemTypeKeyword, lexem.Type)
+		assert.Equal(t, lexer.LexemTypeId, lexem.Type)
 		assert.Equal(t, 2, lexem.Line)
 		assert.Equal(t, 4, lexem.Position)
 		assert.Equal(t, "lexem content", lexem.Value)
@@ -37,7 +37,7 @@ func TestLexerAdapter_FetchLexem(t *testing.T) {
 		lexem, err := adapter.FetchLexem()
 		assert.NoError(t, err)
 
-		assert.Equal(t, lexer.LexemTypeKeyword, lexem.Type)
+		assert.Equal(t, lexer.LexemTypeId, lexem.Type)
 		assert.Equal(t, 5, lexem.Line)
 		assert.Equal(t, 2, lexem.Position)
 		assert.Equal(t, "lexem", lexem.Value)
