@@ -18,7 +18,7 @@ func (serializer Serializer) SerializeGrammar(grammar interface{}) (string, erro
 	case *Grammar:
 		return serialize(grammar), nil
 	case *GrammarWithHeadSequences:
-		return serializeWithSequenceBeta(grammar), nil
+		return serializeWithSequence(grammar), nil
 	default:
 		return "", errors.New(fmt.Sprintf("unknown grammar type %T", grammar))
 	}
@@ -52,7 +52,7 @@ func serializeRoll(leftSideSymbol Symbol, rolls [][]Symbol) string {
 	return buffer
 }
 
-func serializeWithSequenceBeta(grammar *GrammarWithHeadSequences) string {
+func serializeWithSequence(grammar *GrammarWithHeadSequences) string {
 	var buffer string
 
 	axiomPtr := grammar.Grammar.Axiom
