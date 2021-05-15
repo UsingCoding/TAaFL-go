@@ -45,7 +45,7 @@ type lexerExecutor struct {
 func (executor *lexerExecutor) Start() error {
 	err := executor.lexerProcess.Start()
 	if err != nil {
-		return err
+		return newLexerRuntimeError(err)
 	}
 
 	executor.stdout.Read()
@@ -54,7 +54,7 @@ func (executor *lexerExecutor) Start() error {
 }
 
 func (executor *lexerExecutor) Write(data string) error {
-	return executor.stdin.Write(escapeNewLines(data))
+	return newLexerRuntimeError(executor.stdin.Write(escapeNewLines(data)))
 }
 
 func (executor *lexerExecutor) Flush() (string, error) {
@@ -63,7 +63,7 @@ func (executor *lexerExecutor) Flush() (string, error) {
 	}
 	err := executor.stdin.Write("! !")
 	if err != nil {
-		return "", err
+		return "", newLexerRuntimeError(err)
 	}
 
 	data := executor.stdout.Read()
@@ -73,7 +73,7 @@ func (executor *lexerExecutor) Flush() (string, error) {
 
 func (executor *lexerExecutor) Close() error {
 	executor.isClosed = true
-	return executor.lexerProcess.Process.Kill()
+	return newLexerRuntimeError(executor.lexerProcess.Process.Kill())
 }
 
 func (executor *lexerExecutor) IsClosed() bool {
