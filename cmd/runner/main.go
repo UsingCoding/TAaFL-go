@@ -41,7 +41,7 @@ func main() {
 
 	defer lexerImpl.Close()
 
-	err = runModule(grammar, lexerImpl)
+	err = runModule(grammar, lexerImpl, reporterImpl)
 	if err != nil {
 		log.Fatal(err)
 	}
