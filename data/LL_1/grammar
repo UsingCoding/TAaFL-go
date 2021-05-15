@@ -1,11 +1,11 @@
-<Program> -> <main> <openPar> <closePar> <statements> / mainToken
-<main> -> mainToken / mainToken
-<openPar> -> openParenthesis / openParenthesis
-<closePar> -> closingParenthesis / closingParenthesis
-<statements> -> <var> / intToken
-<var> -> <intToken> <id> <appropriation> <integer> <separator> / intToken
-<intToken> -> intToken / intToken
-<id> -> id / id
-<appropriation> -> appropriation / appropriation
-<integer> -> integer / integer
-<separator> -> separator / separator
+<Program> -> <main> <openPar> <closePar> <statements>
+<main> -> mainToken
+<openPar> -> openParenthesis
+<closePar> -> closingParenthesis
+<statements> -> <var>
+<var> -> <intToken> <id> <appropriation> <integer> <separator>
+<intToken> -> intToken
+<id> -> id
+<appropriation> -> appropriation
+<integer> -> integer
+<separator> -> separator

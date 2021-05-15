@@ -3,16 +3,22 @@ package main
 import (
 	"compiler/pkg/common/grammary"
 	"compiler/pkg/common/lexer"
+	"compiler/pkg/common/reporter"
+	factorizerapp "compiler/pkg/factorizer/app"
 	appgenerator "compiler/pkg/generator/app"
 	"compiler/pkg/lexer/infrastructure"
 	lexerexecutor "compiler/pkg/lexer/infrastructure/executor"
 	"compiler/pkg/runner/app"
 	"fmt"
+	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 	"io/ioutil"
 	"log"
 )
 
 func main() {
+	reporterImpl := initReporter()
+
 	config, err := parseConfig()
 	if err != nil {
 		log.Fatalf("Parse config failed %s", err.Error())
@@ -41,27 +47,32 @@ func main() {
 	}
 }
 
-func runModule(grammar grammary.Grammar, lexerImpl lexer.Lexer) error {
+func runModule(grammar grammary.Grammar, lexerImpl lexer.Lexer, reporter reporter.Reporter) error {
+	grammarWithHeadSequences, err := factorizerapp.BuildHeadSequencesForGrammar(grammar)
+	if err != nil {
+		return err
+	}
+
 	serializer := grammary.NewSerializer()
 
-	serializedGrammar, err := serializer.SerializeGrammar(grammar)
+	serializedGrammar, err := serializer.SerializeGrammar(&grammarWithHeadSequences)
 	if err != nil {
 		return err
 	}
 
 	leftParts, rightParts := appgenerator.CreateTables(serializedGrammar)
 
-	isMatched, err := app.Runner(leftParts, rightParts, lexerImpl)
-	if err != nil {
+	err = app.Runner(leftParts, rightParts, lexerImpl)
+	if err != nil && !errors.Is(err, app.AnalyzerErr{}) {
 		return err
 	}
 
 	msg := "Program text is %s\n"
 
-	if isMatched {
-		fmt.Printf(msg, "matched")
+	if err == nil {
+		reporter.Info(fmt.Sprintf(msg, "matched"))
 	} else {
-		fmt.Printf(msg, "not matched")
+		reporter.WithError(err, fmt.Sprintf(msg, "not matched"))
 	}
 
 	return nil
@@ -98,4 +109,13 @@ func getFileData(path string) (string, error) {
 	}
 
 	return string(bytes), nil
+}
+
+func initReporter() reporter.Reporter {
+	impl := logrus.New()
+	impl.SetFormatter(&logrus.TextFormatter{
+		DisableTimestamp: true,
+	})
+
+	return reporter.New(impl)
 }
