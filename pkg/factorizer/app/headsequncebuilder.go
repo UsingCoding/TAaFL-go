@@ -57,28 +57,14 @@ func BuildHeadSequencesForGrammar(grammar grammary.Grammar) (grammary.GrammarWit
 		return grammary.GrammarWithHeadSequences{}, errors.New("no one rules doesnt start with terminal to define head sequence")
 	}
 
-	for leftSideSymbol, symbols := range skippedNonTerminals {
-		sequence := sequences[leftSideSymbol]
-		for rollNumber, symbol := range symbols {
-			rolls, exists := sequences[symbol]
-			if !exists {
-				return grammary.GrammarWithHeadSequences{}, errors.New(fmt.Sprintf("missing nonterminal %s in left side", symbol))
-			}
-
-			// copy sequence to append after merging
-			afterRollNumberSequencePtr := sequence[rollNumber:]
-			afterRollNumberSequence := make([][]string, len(afterRollNumberSequencePtr))
-			copy(afterRollNumberSequence, afterRollNumberSequencePtr)
-
-			sequence = append(sequence[:rollNumber], collectHeadingSymbols(rolls))
-			sequence = append(sequence, afterRollNumberSequence...)
-		}
-		sequences[leftSideSymbol] = sequence
+	err := populateWithSkippedNonTerminals(sequences, skippedNonTerminals)
+	if err != nil {
+		return grammary.GrammarWithHeadSequences{}, err
 	}
 
 	for _, nonTerminal := range emptySymbolNonTerminals {
-		foundedSequence, err := findSequenceForNonTerminal(grammar, nonTerminal)
-		if err != nil {
+		foundedSequence, err2 := findSequenceForNonTerminal(grammar, nonTerminal)
+		if err2 != nil {
 			return grammary.GrammarWithHeadSequences{}, err
 		}
 
@@ -89,6 +75,55 @@ func BuildHeadSequencesForGrammar(grammar grammary.Grammar) (grammary.GrammarWit
 		Grammar:   grammar,
 		Sequences: sequences,
 	}, nil
+}
+
+func populateWithSkippedNonTerminals(sequences map[grammary.Symbol][][]string, skippedNonTerminals map[grammary.Symbol]map[int]grammary.Symbol) error {
+	var populatedNonTerminals []grammary.Symbol
+
+	for {
+		for leftSideSymbol, symbols := range skippedNonTerminals {
+			if isSymbolInSlice(populatedNonTerminals, leftSideSymbol) {
+				continue
+			}
+
+			sequence := sequences[leftSideSymbol]
+
+			var rollsToDelete []int
+
+			for rollNumber, symbol := range symbols {
+				rolls, exists := sequences[symbol]
+				if !exists {
+					// skip to populate other rolls
+					continue
+				}
+
+				// copy sequence to append after merging
+				afterRollNumberSequencePtr := sequence[rollNumber:]
+				afterRollNumberSequence := make([][]string, len(afterRollNumberSequencePtr))
+				copy(afterRollNumberSequence, afterRollNumberSequencePtr)
+
+				sequence = append(sequence[:rollNumber], collectHeadingSymbols(rolls))
+				sequence = append(sequence, afterRollNumberSequence...)
+				rollsToDelete = append(rollsToDelete, rollNumber)
+			}
+
+			if len(rollsToDelete) == len(symbols) {
+				populatedNonTerminals = append(populatedNonTerminals, leftSideSymbol)
+			}
+
+			for _, rollNumber := range rollsToDelete {
+				delete(symbols, rollNumber)
+			}
+
+			sequences[leftSideSymbol] = sequence
+		}
+
+		if len(populatedNonTerminals) == len(skippedNonTerminals) {
+			break
+		}
+	}
+
+	return nil
 }
 
 func collectHeadingSymbols(sequenceRolls [][]string) []string {
@@ -121,4 +156,13 @@ func findSequenceForNonTerminal(grammar grammary.Grammar, nonTerminal grammary.S
 	}
 
 	return "", errors.New(fmt.Sprintf("not found %s in any sequence", nonTerminal))
+}
+
+func isSymbolInSlice(haystack []grammary.Symbol, needle grammary.Symbol) bool {
+	for _, symbol := range haystack {
+		if symbol == needle {
+			return true
+		}
+	}
+	return false
 }
