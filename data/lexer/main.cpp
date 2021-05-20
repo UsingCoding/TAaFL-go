@@ -831,8 +831,8 @@ void FillStates(map<int, string>& states)
   states.insert(pair(108, "falseToken"));
   states.insert(pair(109, "strToken"));
 
-  states.insert(pair<int, string>(110, "openSpecParenthesis"));
-  states.insert(pair<int, string>(111, "closingSpecParenthesis"));
+  states.insert(pair<int, string>(110, "openCurlyParenthesis"));
+  states.insert(pair<int, string>(111, "closingCurlyParenthesis"));
 
   states.insert(pair<int, string>(112, "openSquareParenthesis"));
   states.insert(pair<int, string>(113, "closingSquareParenthesis"));
