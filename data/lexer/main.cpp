@@ -193,7 +193,7 @@ void FillMatrix(Matrix& mat)
 {
   vector<int> preFinalStates //Именно для ключевых слов
   {
-    3, 8, 12, 15, 17, 21, 23, 27, 32, 36, 40, 83, 87, 91, 94
+    3, 8, 12, 15, 17, 21, 23, 27, 32, 36, 40, 83, 87, 91, 94, 110, 111, 112, 113
   };
 
   vector<int> FinalTokenStates //Вместо ключевых слов
@@ -249,11 +249,11 @@ void FillMatrix(Matrix& mat)
   mat[0][77] = 52; // s -> >
 
   mat[0][65] = 55; // s -> (
-  mat[0][67] = 55; // s -> {
+  mat[0][67] = 110; // s -> {
   mat[0][66] = 56; // s -> )
-  mat[0][68] = 56; // s -> }
-  mat[0][79] = 55; // s -> [
-  mat[0][80] = 56; // s -> ]
+  mat[0][68] = 111; // s -> }
+  mat[0][79] = 112; // s -> [
+  mat[0][80] = 113; // s -> ]
 
   mat[0][81] = 76; // s -> stringStart
   
@@ -831,6 +831,12 @@ void FillStates(map<int, string>& states)
   states.insert(pair(108, "falseToken"));
   states.insert(pair(109, "strToken"));
 
+  states.insert(pair<int, string>(110, "openSpecParenthesis"));
+  states.insert(pair<int, string>(111, "closingSpecParenthesis"));
+
+  states.insert(pair<int, string>(112, "openSquareParenthesis"));
+  states.insert(pair<int, string>(113, "closingSquareParenthesis"));
+
   states.insert(pair<int, string>(4, "keyword"));
   states.insert(pair<int, string>(5, "id"));
   states.insert(pair<int, string>(6, "error"));
@@ -864,7 +870,7 @@ int main() {
   vector<int> finalStates
   {
     4, 5, 6, 7, 43, 44, 46, 47, 48, 49, 50, 51, 55, 56, 59, 65, 66, 67, 68, 69, 70, 76, 77, 79,
-    95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109
+    95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113
   };
 
   Matrix matrix;
