@@ -169,6 +169,8 @@ void FillSymbols(map<char, int>& symb)//ДОБАВИТЬ РАЗДЕЛИТЕЛИ
   symb.insert(pair<char, int>(']', 80));
 
   symb.insert(pair<char, int>('"', 81));
+
+  symb.insert(pair<char, int>('|', 82));
 }
 
 void FillSpecial(set<char>& special)
@@ -180,6 +182,7 @@ void FillSpecial(set<char>& special)
   special.insert('[');
   special.insert(']');
   special.insert(';');
+  special.insert('|');
   // special.insert('.');
   // special.insert(',');
   special.insert('+');
@@ -193,7 +196,7 @@ void FillMatrix(Matrix& mat)
 {
   vector<int> preFinalStates //Именно для ключевых слов
   {
-    3, 8, 12, 15, 17, 21, 23, 27, 32, 36, 40, 83, 87, 91, 94, 110, 111, 112, 113
+    3, 8, 12, 15, 17, 21, 23, 27, 32, 36, 40, 83, 87, 91, 94, 110, 111, 112, 113, 114, 115, 117
   };
 
   vector<int> FinalTokenStates //Вместо ключевых слов
@@ -226,6 +229,10 @@ void FillMatrix(Matrix& mat)
         mat[i][j] = 5;
       else if(j == 77) // >
         mat[i][j] = 5;
+      else if(j == 70) // ,
+        mat[i][j] = 5;
+      if(i == 116) // -> ,
+        mat[i][j] = 117;
     }
   }
 
@@ -256,8 +263,10 @@ void FillMatrix(Matrix& mat)
   mat[0][80] = 113; // s -> ]
 
   mat[0][81] = 76; // s -> stringStart
+
+  mat[0][82] = 114; // s -> |
   
-  mat[0][70] = 71; // s -> point
+  mat[0][70] = 116; // s -> preComma
   mat[0][78] = 71; // s -> point
 
   mat[71][70] = 7; // point -> separator
@@ -275,7 +284,26 @@ void FillMatrix(Matrix& mat)
   mat[71][68] = 7;
   mat[71][79] = 7; 
   mat[71][80] = 7;
-  mat[71][81] = 7;   
+  mat[71][81] = 7;  
+  mat[71][82] = 7;  
+
+  mat[116][70] = 117; // preComma -> commaToken
+  mat[116][78] = 117; // preComma -> commaToken
+  mat[116][63] = 117; // preComma -> commaToken
+  mat[116][64] = 117;
+  mat[116][69] = 117;
+  mat[116][73] = 117; 
+  mat[116][74] = 117; 
+  mat[116][72] = 117; 
+  mat[116][71] = 117;
+  mat[116][65] = 117; 
+  mat[116][67] = 117; 
+  mat[116][66] = 117; 
+  mat[116][68] = 117;
+  mat[116][79] = 117; 
+  mat[116][80] = 117;
+  mat[116][81] = 117; 
+  mat[116][82] = 117;   
 
   for(int i = 0; i < INPUT_SYMBOLS_COUNT; ++i)
   {
@@ -304,6 +332,17 @@ void FillMatrix(Matrix& mat)
   mat[71][59] = 42;
   mat[71][60] = 42;
   mat[71][61] = 42;
+
+  mat[116][52] = 42; // preComma -> creatingFloat
+  mat[116][53] = 42;
+  mat[116][54] = 42;
+  mat[116][55] = 42;
+  mat[116][56] = 42;
+  mat[116][57] = 42;
+  mat[116][58] = 42;
+  mat[116][59] = 42;
+  mat[116][60] = 42;
+  mat[116][61] = 42;
   
   mat[57][71] = 58; // creatingComment -> creatingOneLineComment2
   mat[57][72] = 60; // creatingComment -> creatingManyLineComment2
@@ -366,6 +405,7 @@ void FillMatrix(Matrix& mat)
   mat[41][76] = 43; 
   mat[41][75] = 43;  
   mat[41][81] = 43; 
+  mat[41][82] = 43;
 
   mat[42][52] = 42; // creatingFloat
   mat[42][53] = 42;
@@ -434,7 +474,8 @@ void FillMatrix(Matrix& mat)
   mat[75][68] = 44;
   mat[75][79] = 44; 
   mat[75][80] = 44; 
-  mat[75][81] = 44;  
+  mat[75][81] = 44; 
+  mat[75][82] = 44;  
 
   mat[75][77] = 44; 
   mat[75][76] = 44; 
@@ -462,6 +503,7 @@ void FillMatrix(Matrix& mat)
   mat[45][76] = 6; 
   mat[45][75] = 6;  
   mat[45][81] = 6; 
+  mat[45][82] = 6;  
 
   mat[42][73] = 44; // float
   mat[42][74] = 44; 
@@ -479,6 +521,7 @@ void FillMatrix(Matrix& mat)
   mat[42][79] = 44; 
   mat[42][80] = 44;  
   mat[42][81] = 44; 
+  mat[42][82] = 44; 
 
   mat[42][77] = 44; 
   mat[42][76] = 44; 
@@ -502,7 +545,8 @@ void FillMatrix(Matrix& mat)
   mat[61][68] = 43;
   mat[61][79] = 44; 
   mat[61][80] = 44;  
-  mat[61][81] = 44;   
+  mat[61][81] = 44; 
+  mat[61][82] = 44;    
 
   mat[61][77] = 43; 
   mat[61][76] = 43; 
@@ -549,7 +593,8 @@ void FillMatrix(Matrix& mat)
   mat[64][68] = 65;
   mat[64][79] = 65; 
   mat[64][80] = 65;  
-  mat[64][81] = 65;  
+  mat[64][81] = 65;
+  mat[64][82] = 65;    
 
   mat[1][39] = 2; // i -> in
   mat[1][31] = 8; // i -> if
@@ -611,6 +656,7 @@ void FillMatrix(Matrix& mat)
     mat[preFinalStates[i]][63] = FinalTokenStates[i]; // keyword
     mat[preFinalStates[i]][64] = FinalTokenStates[i];
     mat[preFinalStates[i]][69] = FinalTokenStates[i];
+    mat[preFinalStates[i]][70] = FinalTokenStates[i];
     mat[preFinalStates[i]][73] = FinalTokenStates[i]; // keyword+
     mat[preFinalStates[i]][74] = FinalTokenStates[i]; // keyword-
     mat[preFinalStates[i]][72] = FinalTokenStates[i]; // keyword/
@@ -624,7 +670,8 @@ void FillMatrix(Matrix& mat)
     mat[preFinalStates[i]][68] = FinalTokenStates[i];
     mat[preFinalStates[i]][79] = FinalTokenStates[i]; 
     mat[preFinalStates[i]][80] = FinalTokenStates[i]; 
-    mat[preFinalStates[i]][81] = FinalTokenStates[i];   
+    mat[preFinalStates[i]][81] = FinalTokenStates[i];
+    mat[preFinalStates[i]][82] = FinalTokenStates[i];   
   }
 
   for(int i = 0; i < INPUT_SYMBOLS_COUNT; ++i)
@@ -661,6 +708,7 @@ void FillMatrix(Matrix& mat)
   mat[52][79] = 51; 
   mat[52][80] = 51;  
   mat[52][81] = 51;   
+  mat[52][82] = 51;  
 
   mat[52][75] = 53; // comp1 -> comp2
   mat[52][76] = 53;
@@ -686,9 +734,10 @@ void FillMatrix(Matrix& mat)
   mat[9][79] = 5; 
   mat[9][80] = 5;    
   mat[9][81] = 5;    
+  mat[9][82] = 5;    
 
   // mat[0][63] = 7;
-  mat[0][64] = 7;
+  mat[0][64] = 115;
   // mat[0][70] = 7;
   // mat[0][78] = 7;
 }
@@ -837,6 +886,13 @@ void FillStates(map<int, string>& states)
   states.insert(pair<int, string>(112, "openSquareParenthesis"));
   states.insert(pair<int, string>(113, "closingSquareParenthesis"));
 
+  states.insert(pair(114, "straightSlashToken"));
+
+  states.insert(pair(115, "semicolonToken"));
+
+  states.insert(pair(116, "preComma"));
+  states.insert(pair(117, "commaToken"));
+
   states.insert(pair<int, string>(4, "keyword"));
   states.insert(pair<int, string>(5, "id"));
   states.insert(pair<int, string>(6, "error"));
@@ -870,7 +926,8 @@ int main() {
   vector<int> finalStates
   {
     4, 5, 6, 7, 43, 44, 46, 47, 48, 49, 50, 51, 55, 56, 59, 65, 66, 67, 68, 69, 70, 76, 77, 79,
-    95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113
+    95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 
+    114, 115, 117
   };
 
   Matrix matrix;
