@@ -171,6 +171,8 @@ void FillSymbols(map<char, int>& symb)//ДОБАВИТЬ РАЗДЕЛИТЕЛИ
   symb.insert(pair<char, int>('"', 81));
 
   symb.insert(pair<char, int>('|', 82));
+  
+  symb.insert(pair<char, int>(':', 83));
 }
 
 void FillSpecial(set<char>& special)
@@ -231,8 +233,11 @@ void FillMatrix(Matrix& mat)
         mat[i][j] = 5;
       else if(j == 70) // ,
         mat[i][j] = 5;
+
       if(i == 116) // -> ,
         mat[i][j] = 117;
+      else if (i == 119) // : -> ::
+        mat[i][j] = 120;
     }
   }
 
@@ -265,6 +270,8 @@ void FillMatrix(Matrix& mat)
   mat[0][81] = 76; // s -> stringStart
 
   mat[0][82] = 114; // s -> |
+
+  mat[0][83] = 118; // s -> creatingDblColon
   
   mat[0][70] = 116; // s -> preComma
   mat[0][78] = 71; // s -> point
@@ -286,6 +293,7 @@ void FillMatrix(Matrix& mat)
   mat[71][80] = 7;
   mat[71][81] = 7;  
   mat[71][82] = 7;  
+  mat[71][83] = 7;
 
   mat[116][70] = 117; // preComma -> commaToken
   mat[116][78] = 117; // preComma -> commaToken
@@ -304,6 +312,7 @@ void FillMatrix(Matrix& mat)
   mat[116][80] = 117;
   mat[116][81] = 117; 
   mat[116][82] = 117;   
+  mat[116][83] = 117;  
 
   for(int i = 0; i < INPUT_SYMBOLS_COUNT; ++i)
   {
@@ -404,8 +413,11 @@ void FillMatrix(Matrix& mat)
   mat[41][77] = 43; 
   mat[41][76] = 43; 
   mat[41][75] = 43;  
+  mat[41][79] = 43;  
+  mat[41][80] = 43; 
   mat[41][81] = 43; 
   mat[41][82] = 43;
+  mat[41][83] = 43; 
 
   mat[42][52] = 42; // creatingFloat
   mat[42][53] = 42;
@@ -476,6 +488,7 @@ void FillMatrix(Matrix& mat)
   mat[75][80] = 44; 
   mat[75][81] = 44; 
   mat[75][82] = 44;  
+  mat[75][83] = 44;   
 
   mat[75][77] = 44; 
   mat[75][76] = 44; 
@@ -504,6 +517,7 @@ void FillMatrix(Matrix& mat)
   mat[45][75] = 6;  
   mat[45][81] = 6; 
   mat[45][82] = 6;  
+  mat[45][83] = 6;  
 
   mat[42][73] = 44; // float
   mat[42][74] = 44; 
@@ -522,6 +536,7 @@ void FillMatrix(Matrix& mat)
   mat[42][80] = 44;  
   mat[42][81] = 44; 
   mat[42][82] = 44; 
+  mat[42][83] = 44; 
 
   mat[42][77] = 44; 
   mat[42][76] = 44; 
@@ -547,6 +562,7 @@ void FillMatrix(Matrix& mat)
   mat[61][80] = 44;  
   mat[61][81] = 44; 
   mat[61][82] = 44;    
+  mat[61][83] = 44;   
 
   mat[61][77] = 43; 
   mat[61][76] = 43; 
@@ -595,6 +611,7 @@ void FillMatrix(Matrix& mat)
   mat[64][80] = 65;  
   mat[64][81] = 65;
   mat[64][82] = 65;    
+  mat[64][83] = 65;  
 
   mat[1][39] = 2; // i -> in
   mat[1][31] = 8; // i -> if
@@ -672,6 +689,7 @@ void FillMatrix(Matrix& mat)
     mat[preFinalStates[i]][80] = FinalTokenStates[i]; 
     mat[preFinalStates[i]][81] = FinalTokenStates[i];
     mat[preFinalStates[i]][82] = FinalTokenStates[i];   
+    mat[preFinalStates[i]][83] = FinalTokenStates[i];        
   }
 
   for(int i = 0; i < INPUT_SYMBOLS_COUNT; ++i)
@@ -709,6 +727,7 @@ void FillMatrix(Matrix& mat)
   mat[52][80] = 51;  
   mat[52][81] = 51;   
   mat[52][82] = 51;  
+  mat[52][83] = 51;   
 
   mat[52][75] = 53; // comp1 -> comp2
   mat[52][76] = 53;
@@ -735,6 +754,28 @@ void FillMatrix(Matrix& mat)
   mat[9][80] = 5;    
   mat[9][81] = 5;    
   mat[9][82] = 5;    
+  mat[9][83] = 5;
+
+  mat[118][83] = 119; // creatingDblColon -> preDblColon    
+
+  mat[119][70] = 120; // preComma -> commaToken
+  mat[119][78] = 120; // preComma -> commaToken
+  mat[119][63] = 120; // preComma -> commaToken
+  mat[119][64] = 120;
+  mat[119][69] = 120;
+  mat[119][73] = 120; 
+  mat[119][74] = 120; 
+  mat[119][72] = 120; 
+  mat[119][71] = 120;
+  mat[119][65] = 120; 
+  mat[119][67] = 120; 
+  mat[119][66] = 120; 
+  mat[119][68] = 120;
+  mat[119][79] = 120; 
+  mat[119][80] = 120;
+  mat[119][81] = 120; 
+  mat[119][82] = 120; 
+  mat[119][83] = 45;  
 
   // mat[0][63] = 7;
   mat[0][64] = 115;
@@ -886,12 +927,16 @@ void FillStates(map<int, string>& states)
   states.insert(pair<int, string>(112, "openSquareParenthesis"));
   states.insert(pair<int, string>(113, "closingSquareParenthesis"));
 
-  states.insert(pair(114, "straightSlashToken"));
+  states.insert(pair<int, string>(114, "straightSlashToken"));
 
-  states.insert(pair(115, "semicolonToken"));
+  states.insert(pair<int, string>(115, "semicolonToken"));
 
-  states.insert(pair(116, "preComma"));
-  states.insert(pair(117, "commaToken"));
+  states.insert(pair<int, string>(116, "preComma"));
+  states.insert(pair<int, string>(117, "commaToken"));  
+
+  states.insert(pair<int, string>(118, "creatingDblColon"));
+  states.insert(pair<int, string>(119, "perDblColon"));
+  states.insert(pair<int, string>(120, "dblColonToken"));
 
   states.insert(pair<int, string>(4, "keyword"));
   states.insert(pair<int, string>(5, "id"));
@@ -927,7 +972,7 @@ int main() {
   {
     4, 5, 6, 7, 43, 44, 46, 47, 48, 49, 50, 51, 55, 56, 59, 65, 66, 67, 68, 69, 70, 76, 77, 79,
     95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 
-    114, 115, 117
+    114, 115, 117, 120
   };
 
   Matrix matrix;
