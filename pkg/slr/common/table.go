@@ -43,12 +43,16 @@ func (table *Table) ResolveTableRef(ref TableRef) (TableEntry, error) {
 func (tableEntry TableEntry) String() string {
 	result := make([]string, 0, len(tableEntry))
 	for _, entry := range tableEntry {
-		result = append(result, fmt.Sprintf(
-			"%s%d%d",
-			entry.Symbol.String(),
-			entry.RuleNumber,
-			entry.NumberInRule,
-		))
+		result = append(result, entry.String())
 	}
 	return strings.Join(result, ",")
+}
+
+func (grammarEntry GrammarEntry) String() string {
+	return fmt.Sprintf(
+		"%s%d%d",
+		grammarEntry.Symbol.String(),
+		grammarEntry.RuleNumber,
+		grammarEntry.NumberInRule,
+	)
 }
