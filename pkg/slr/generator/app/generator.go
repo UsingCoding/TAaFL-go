@@ -37,11 +37,13 @@ type generateStrategy struct {
 
 func (strategy *generateStrategy) do() (slr.Table, error) {
 	// adding Axiom as first element to be proceed
-	strategy.tableRefs = append(strategy.tableRefs, slr.TableEntry{slr.GrammarEntry{
-		Symbol:       strategy.grammar.Axiom(),
-		RuleNumber:   0,
-		NumberInRule: 0,
-	}})
+	strategy.tableRefs = append(strategy.tableRefs, slr.TableEntry{
+		GrammarEntries: []slr.GrammarEntry{{
+			Symbol:       strategy.grammar.Axiom(),
+			RuleNumber:   0,
+			NumberInRule: 0,
+		}},
+	})
 	strategy.tableRefsStack = append(strategy.tableRefsStack, 0)
 
 	for len(strategy.tableRefsStack) != 0 {
@@ -52,12 +54,12 @@ func (strategy *generateStrategy) do() (slr.Table, error) {
 		// pop stack
 		strategy.tableRefsStack = strategy.tableRefsStack[:len(strategy.tableRefsStack)-1]
 
-		for _, grammarEntry := range tableEntry {
+		for _, grammarEntry := range tableEntry.GrammarEntries {
 
-			strategy.printState()
+			//strategy.printState()
 
 			rule := strategy.grammar.Rules()[grammarEntry.RuleNumber]
-			fmt.Println("RULE", rule)
+			//fmt.Println("RULE", rule)
 
 			nextNumberInRule := grammarEntry.NumberInRule + 1
 
@@ -66,6 +68,7 @@ func (strategy *generateStrategy) do() (slr.Table, error) {
 			}
 
 			if int(nextNumberInRule) == len(rule.RuleSymbols()) {
+				strategy.recursivelyFindCollapsingEntry(tableRef, grammarEntry)
 				fmt.Println("COLLAPSING BY GRAMMAR ENTRY", grammarEntry)
 				continue
 			}
@@ -98,7 +101,6 @@ func (strategy *generateStrategy) do() (slr.Table, error) {
 
 			strategy.proceedRecursiveTransitClosure(tableRef, symbol)
 		}
-		strategy.printState()
 	}
 
 	return slr.Table{
@@ -132,6 +134,65 @@ func (strategy *generateStrategy) proceedRecursiveTransitClosure(tableRefKey slr
 	}
 }
 
+func (strategy *generateStrategy) recursivelyFindCollapsingEntry(tableRefKey slr.TableRef, grammarEntry slr.GrammarEntry) {
+	collapsingRule := strategy.grammar.Rules()[grammarEntry.RuleNumber]
+	symbolCollapsingTo := collapsingRule.LeftSideSymbol()
+	countOfSymbolsInCollapsingRule := uint(len(collapsingRule.RuleSymbols()))
+
+	if collapsingRule.LeftSideSymbol() == strategy.grammar.Axiom() && grammarEntry.NumberInRule+1 == countOfSymbolsInCollapsingRule {
+		strategy.safeWriteToTableEntryNewCollapseEntry(
+			tableRefKey,
+			grammary.NewSymbol(grammary.EndOfSequence),
+			slr.CollapseEntry{
+				RuleNumber:           grammarEntry.RuleNumber,
+				Symbol:               grammary.NewSymbol("R"),
+				CountOfSymbolsInRule: countOfSymbolsInCollapsingRule,
+			},
+		)
+		return
+	}
+
+	grammarEntries := strategy.findGrammarEntriesForSymbol(symbolCollapsingTo)
+
+	for _, entry := range grammarEntries {
+		rule := strategy.grammar.Rules()[entry.RuleNumber]
+		fmt.Println("RULE", rule)
+		fmt.Println("GRAMMAR ENTRY", entry)
+		countOfSymbolsInRule := uint(len(rule.RuleSymbols()))
+
+		// checking that element last in axiom rule
+		if rule.LeftSideSymbol() == strategy.grammar.Axiom() && entry.NumberInRule+1 == countOfSymbolsInRule {
+			strategy.safeWriteToTableEntryNewCollapseEntry(
+				tableRefKey,
+				grammary.NewSymbol(grammary.EndOfSequence),
+				slr.CollapseEntry{
+					RuleNumber:           grammarEntry.RuleNumber,
+					Symbol:               grammary.NewSymbol("R"),
+					CountOfSymbolsInRule: countOfSymbolsInRule,
+				},
+			)
+			continue
+		}
+
+		nextSymbol := rule.RuleSymbols()[entry.NumberInRule+1]
+
+		if !nextSymbol.NonTerminal() {
+			strategy.safeWriteToTableEntryNewCollapseEntry(
+				tableRefKey,
+				nextSymbol,
+				slr.CollapseEntry{
+					RuleNumber:           grammarEntry.RuleNumber,
+					Symbol:               grammary.NewSymbol("R"),
+					CountOfSymbolsInRule: countOfSymbolsInRule,
+				},
+			)
+			continue
+		}
+
+		strategy.recursivelyFindCollapsingEntry(tableRefKey, grammarEntry)
+	}
+}
+
 func (strategy *generateStrategy) safeWriteToTableEntryNewGrammarEntry(
 	tableRefKey slr.TableRef,
 	symbol grammary.Symbol,
@@ -152,7 +213,31 @@ func (strategy *generateStrategy) safeWriteToTableEntryNewGrammarEntry(
 
 	tableEntry := strategy.tableRefs[tableRef]
 
-	tableEntry = append(tableEntry, grammarEntry)
+	tableEntry.GrammarEntries = append(tableEntry.GrammarEntries, grammarEntry)
+
+	strategy.tableRefs[tableRef] = tableEntry
+}
+
+func (strategy *generateStrategy) safeWriteToTableEntryNewCollapseEntry(
+	tableRefKey slr.TableRef,
+	symbol grammary.Symbol,
+	grammarEntry slr.CollapseEntry,
+) {
+	if _, ok := strategy.table[tableRefKey]; !ok {
+		strategy.table[tableRefKey] = map[grammary.Symbol]slr.TableRef{}
+	}
+
+	tableRef, ok := strategy.table[tableRefKey][symbol]
+	if !ok {
+		// if table ref not exists we create new and put to stack to proceed later
+		tableRef = strategy.newTableRef(strategy.tableRefs)
+		strategy.table[tableRefKey][symbol] = tableRef
+		strategy.tableRefs = append(strategy.tableRefs, slr.TableEntry{})
+	}
+
+	tableEntry := strategy.tableRefs[tableRef]
+
+	tableEntry.CollapseEntry = &grammarEntry
 
 	strategy.tableRefs[tableRef] = tableEntry
 }
@@ -169,4 +254,20 @@ func (strategy *generateStrategy) printState() {
 	fmt.Println("TABLE", strategy.table)
 
 	fmt.Println("END STATE")
+}
+
+func (strategy *generateStrategy) findGrammarEntriesForSymbol(symbol grammary.Symbol) []slr.GrammarEntry {
+	var result []slr.GrammarEntry
+	for ruleNumber, rule := range strategy.grammar.Rules() {
+		for numberInRule, symbolInRule := range rule.RuleSymbols() {
+			if symbolInRule == symbol {
+				result = append(result, slr.GrammarEntry{
+					Symbol:       symbolInRule,
+					RuleNumber:   uint(ruleNumber),
+					NumberInRule: uint(numberInRule),
+				})
+			}
+		}
+	}
+	return result
 }
