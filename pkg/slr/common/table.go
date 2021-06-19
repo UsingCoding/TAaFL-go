@@ -13,8 +13,9 @@ var (
 
 type (
 	Table struct {
-		TableMap  TableMap
-		TableRefs TableRefs
+		TableMap          TableMap
+		TableRefs         TableRefs
+		NonValidTableRefs []TableRef
 	}
 
 	TableMap map[TableRef]map[grammary.Symbol]TableRef
@@ -29,6 +30,8 @@ type (
 		GrammarEntries []GrammarEntry
 		// collapse entry may not be
 		CollapseEntry *CollapseEntry
+		// non valid when we detect same table entry and remove this one
+		NonValid bool
 	}
 
 	GrammarEntry struct {
@@ -65,6 +68,33 @@ func (tableEntry TableEntry) String() string {
 	}
 
 	return strings.Join(result, ",")
+}
+
+func (tableEntry TableEntry) Equal(other TableEntry) bool {
+	if len(tableEntry.GrammarEntries) != len(other.GrammarEntries) {
+		return false
+	}
+
+	inSlice := func(needle GrammarEntry, haystack []GrammarEntry) bool {
+		for _, entry := range haystack {
+			if entry == needle {
+				return true
+			}
+		}
+		return false
+	}
+
+	for _, entry := range tableEntry.GrammarEntries {
+		if !inSlice(entry, other.GrammarEntries) {
+			return false
+		}
+	}
+
+	if tableEntry.CollapseEntry != other.CollapseEntry {
+		return false
+	}
+
+	return true
 }
 
 func (grammarEntry GrammarEntry) String() string {

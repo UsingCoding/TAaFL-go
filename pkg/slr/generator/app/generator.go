@@ -33,6 +33,10 @@ type generateStrategy struct {
 	tableRefs slr.TableRefs
 	// stack with refs that needs to be proceed
 	tableRefsStack []slr.TableRef
+	// counter to resolve new TableRef
+	tableRefsCounter *slr.TableRef
+	// store proceeded table refs
+	nonValidTableRefs []slr.TableRef
 }
 
 func (strategy *generateStrategy) do() (slr.Table, error) {
@@ -44,9 +48,11 @@ func (strategy *generateStrategy) do() (slr.Table, error) {
 			NumberInRule: 0,
 		}},
 	})
-	strategy.tableRefsStack = append(strategy.tableRefsStack, 0)
+	strategy.tableRefsStack = append(strategy.tableRefsStack, strategy.newTableRef())
 
 	for len(strategy.tableRefsStack) != 0 {
+
+		strategy.printState()
 
 		tableRef := strategy.tableRefsStack[len(strategy.tableRefsStack)-1]
 		tableEntry := strategy.tableRefs[tableRef]
@@ -59,7 +65,6 @@ func (strategy *generateStrategy) do() (slr.Table, error) {
 			//strategy.printState()
 
 			rule := strategy.grammar.Rules()[grammarEntry.RuleNumber]
-			//fmt.Println("RULE", rule)
 
 			nextNumberInRule := grammarEntry.NumberInRule + 1
 
@@ -69,13 +74,13 @@ func (strategy *generateStrategy) do() (slr.Table, error) {
 
 			if int(nextNumberInRule) == len(rule.RuleSymbols()) {
 				strategy.recursivelyFindCollapsingEntry(tableRef, grammarEntry)
-				fmt.Println("COLLAPSING BY GRAMMAR ENTRY", grammarEntry)
 				continue
 			}
 
 			symbol := rule.RuleSymbols()[nextNumberInRule]
 
 			if !symbol.NonTerminal() {
+				fmt.Println("SOME REF", tableRef)
 				strategy.safeWriteToTableEntryNewGrammarEntry(
 					tableRef,
 					symbol,
@@ -85,7 +90,6 @@ func (strategy *generateStrategy) do() (slr.Table, error) {
 						NumberInRule: nextNumberInRule,
 					},
 				)
-
 				continue
 			}
 
@@ -101,11 +105,14 @@ func (strategy *generateStrategy) do() (slr.Table, error) {
 
 			strategy.proceedRecursiveTransitClosure(tableRef, symbol)
 		}
+		fmt.Println("ITERATION")
+		fmt.Println()
 	}
 
 	return slr.Table{
-		TableMap:  strategy.table,
-		TableRefs: strategy.tableRefs,
+		TableMap:          strategy.table,
+		TableRefs:         strategy.tableRefs,
+		NonValidTableRefs: strategy.nonValidTableRefs,
 	}, nil
 }
 
@@ -205,7 +212,7 @@ func (strategy *generateStrategy) safeWriteToTableEntryNewGrammarEntry(
 	tableRef, ok := strategy.table[tableRefKey][symbol]
 	if !ok {
 		// if table ref not exists we create new and put to stack to proceed later
-		tableRef = strategy.newTableRef(strategy.tableRefs)
+		tableRef = strategy.newTableRef()
 		strategy.table[tableRefKey][symbol] = tableRef
 		strategy.tableRefs = append(strategy.tableRefs, slr.TableEntry{})
 		strategy.tableRefsStack = append(strategy.tableRefsStack, tableRef)
@@ -214,6 +221,15 @@ func (strategy *generateStrategy) safeWriteToTableEntryNewGrammarEntry(
 	tableEntry := strategy.tableRefs[tableRef]
 
 	tableEntry.GrammarEntries = append(tableEntry.GrammarEntries, grammarEntry)
+
+	if sameTableRef := strategy.fetchSameTableEntry(tableEntry); sameTableRef != nil {
+		strategy.table[tableRefKey][symbol] = slr.TableRef(*sameTableRef)
+
+		// mark tableEntry NonValid
+		tableEntry.NonValid = true
+		strategy.nonValidTableRefs = append(strategy.nonValidTableRefs, tableRef)
+		return
+	}
 
 	strategy.tableRefs[tableRef] = tableEntry
 }
@@ -229,8 +245,8 @@ func (strategy *generateStrategy) safeWriteToTableEntryNewCollapseEntry(
 
 	tableRef, ok := strategy.table[tableRefKey][symbol]
 	if !ok {
-		// if table ref not exists we create new and put to stack to proceed later
-		tableRef = strategy.newTableRef(strategy.tableRefs)
+		// if table ref not exists we create new
+		tableRef = strategy.newTableRef()
 		strategy.table[tableRefKey][symbol] = tableRef
 		strategy.tableRefs = append(strategy.tableRefs, slr.TableEntry{})
 	}
@@ -242,8 +258,15 @@ func (strategy *generateStrategy) safeWriteToTableEntryNewCollapseEntry(
 	strategy.tableRefs[tableRef] = tableEntry
 }
 
-func (strategy *generateStrategy) newTableRef(refs slr.TableRefs) slr.TableRef {
-	return slr.TableRef(len(refs))
+func (strategy *generateStrategy) newTableRef() slr.TableRef {
+	if strategy.tableRefsCounter == nil {
+		newCounter := slr.TableRef(0)
+		strategy.tableRefsCounter = &newCounter
+		return *strategy.tableRefsCounter
+	}
+
+	*strategy.tableRefsCounter++
+	return *strategy.tableRefsCounter
 }
 
 func (strategy *generateStrategy) printState() {
@@ -251,6 +274,7 @@ func (strategy *generateStrategy) printState() {
 
 	fmt.Println("STACK", strategy.tableRefsStack)
 	fmt.Println("TABLE REFS", strategy.tableRefs)
+	fmt.Println("NON VALID TABLE REFS", strategy.nonValidTableRefs)
 	fmt.Println("TABLE", strategy.table)
 
 	fmt.Println("END STATE")
@@ -270,4 +294,14 @@ func (strategy *generateStrategy) findGrammarEntriesForSymbol(symbol grammary.Sy
 		}
 	}
 	return result
+}
+
+func (strategy *generateStrategy) fetchSameTableEntry(entry slr.TableEntry) *int {
+	for tableRef, tableEntry := range strategy.tableRefs {
+		if tableEntry.Equal(entry) {
+			fmt.Printf("EQUAL: %s - %s\n", tableEntry, entry)
+			return &tableRef
+		}
+	}
+	return nil
 }

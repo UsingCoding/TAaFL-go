@@ -27,6 +27,9 @@ func (serializer *csvSerializer) Serialize(table common.Table) (string, error) {
 	records = append(records, serializer.writeHeader(headersMap))
 
 	for tableRefKey, row := range table.TableMap {
+		if serializer.isNonValidTableRef(tableRefKey, table.NonValidTableRefs) {
+			continue
+		}
 		record := newRecord(len(headersMap) + 1)
 		tableEntryKey, err := table.ResolveTableRef(tableRefKey)
 		if err != nil {
@@ -93,4 +96,13 @@ func (serializer *csvSerializer) writeHeader(headerMap map[grammary.Symbol]int) 
 	}
 
 	return record
+}
+
+func (serializer *csvSerializer) isNonValidTableRef(ref common.TableRef, nonValidRefs []common.TableRef) bool {
+	for _, nonValidRef := range nonValidRefs {
+		if nonValidRef == ref {
+			return true
+		}
+	}
+	return false
 }
