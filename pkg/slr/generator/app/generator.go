@@ -119,7 +119,15 @@ func (strategy *generateStrategy) do() (slr.Table, error) {
 func (strategy *generateStrategy) proceedRecursiveTransitClosure(tableRefKey slr.TableRef, handledNonTerminal grammary.Symbol) {
 	rulesMap := strategy.grammar.FindByLeftSideSymbol(handledNonTerminal)
 
-	for ruleNumber, rule := range rulesMap {
+	keys := make([]int, 0, len(rulesMap))
+	for k := range rulesMap {
+		keys = append(keys, int(k))
+	}
+	sort.Ints(keys)
+
+	for _, key := range keys {
+		ruleNumber := uint(key)
+		rule := rulesMap[ruleNumber]
 		const firstSymbolPos = 0
 		symbol := rule.RuleSymbols()[firstSymbolPos]
 
