@@ -1,6 +1,7 @@
 package app
 
 import (
+	"fmt"
 	"testing"
 
 	slr "compiler/pkg/slr/common"
@@ -56,9 +57,7 @@ func TestGenerator_GenerateTable_SimpleGrammar(t *testing.T) {
 		},
 		{
 			CollapseEntry: &slr.CollapseEntry{
-				RuleNumber:           0,
-				Symbol:               grammary.NewSymbol("R"),
-				CountOfSymbolsInRule: 1,
+				RuleNumber: 0,
 			},
 		},
 	},
@@ -175,6 +174,38 @@ func TestGenerator_GenerateTable_SecondGrammar(t *testing.T) {
 	},
 		table.TableRefs,
 	)
+}
+
+func TestGenerator_GenerateTable_RecursiveGrammar(t *testing.T) {
+	generator := NewGenerator()
+	validator := NewValidator()
+
+	table, err := generator.GenerateTable(inlinedgrammary.New(
+		grammary.NewSymbol("<F>"),
+		inlinedgrammary.NewRule(grammary.NewSymbol("<F>"), []grammary.Symbol{
+			grammary.NewSymbol("<S>"),
+		}),
+		inlinedgrammary.NewRule(grammary.NewSymbol("<S>"), []grammary.Symbol{
+			grammary.NewSymbol("("),
+			grammary.NewSymbol("<S>"),
+			grammary.NewSymbol(")"),
+		}),
+		inlinedgrammary.NewRule(grammary.NewSymbol("<S>"), []grammary.Symbol{
+			grammary.NewSymbol("("),
+			grammary.NewSymbol(")"),
+		}),
+	))
+	assert.NoError(t, err)
+
+	assert.NoError(t, validator.Validate(table))
+
+	expectedMap := "map[0:map[(:2 <S>:1] 1:map[_|_:13] 2:map[(:2 ):5 <S>:3] 3:map[):10] 4:map[(:2 <S>:3] 5:map[):7 _|_:6] 10:map[):12 _|_:11]]"
+	expectedRefs := "[<F>00 <S>00 (10,(20 <S>11 (10 )21 R:2 R:2   )12 R:1 R:1 R:0]"
+	expectedNonValidRefs := "[4 8 9 4]"
+
+	assert.Equal(t, expectedMap, fmt.Sprint(table.TableMap))
+	assert.Equal(t, expectedRefs, fmt.Sprint(table.TableRefs))
+	assert.Equal(t, expectedNonValidRefs, fmt.Sprint(table.NonValidTableRefs))
 }
 
 // Added for more detailed error messages
