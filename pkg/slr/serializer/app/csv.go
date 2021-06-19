@@ -48,7 +48,6 @@ func (serializer *csvSerializer) Serialize(table common.Table) (string, error) {
 			record[position] = tableEntry.String()
 		}
 
-		fmt.Println(record)
 		records = append(records, record)
 	}
 
