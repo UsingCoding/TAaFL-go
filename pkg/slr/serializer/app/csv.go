@@ -20,7 +20,7 @@ func newRecord(length int) []string {
 	return make([]string, length)
 }
 
-func (serializer *csvSerializer) Export(table common.Table) (string, error) {
+func (serializer *csvSerializer) Serialize(table common.Table) (string, error) {
 	headersMap := serializer.buildHeaderSymbolsMap(table.TableMap)
 
 	records := make([][]string, 0, len(table.TableRefs)+1)

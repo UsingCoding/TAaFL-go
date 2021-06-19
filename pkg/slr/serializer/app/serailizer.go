@@ -5,5 +5,5 @@ import (
 )
 
 type TableSerializer interface {
-	Export(table common.Table) (string, error)
+	Serialize(table common.Table) (string, error)
 }
