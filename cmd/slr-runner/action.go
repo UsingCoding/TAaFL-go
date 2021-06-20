@@ -3,6 +3,7 @@ package main
 import (
 	"compiler/pkg/common/lexer"
 	slrrunnner "compiler/pkg/slr/runner/app"
+	"fmt"
 	"github.com/urfave/cli/v2"
 
 	"compiler/pkg/common/grammary"
@@ -32,6 +33,10 @@ func executeAction(ctx *cli.Context) error {
 			grammary.NewSymbol(")"),
 		}),
 	))
+
+	if err == nil {
+		fmt.Println("OK")
+	}
 
 	return err
 }
