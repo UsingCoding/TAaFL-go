@@ -13,6 +13,7 @@ var (
 
 type (
 	Table struct {
+		AxiomRef          TableRef
 		TableMap          TableMap
 		TableRefs         TableRefs
 		NonValidTableRefs []TableRef
@@ -41,10 +42,8 @@ type (
 	}
 
 	CollapseEntry struct {
-		RuleNumber uint
-		//deprecated
-		Symbol grammary.Symbol
-		//deprecated
+		RuleNumber           uint
+		Symbol               grammary.Symbol
 		CountOfSymbolsInRule uint
 	}
 )

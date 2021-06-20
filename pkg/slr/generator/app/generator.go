@@ -104,6 +104,7 @@ func (strategy *generateStrategy) do() (slr.Table, error) {
 	}
 
 	return slr.Table{
+		AxiomRef:          slr.TableRef(0),
 		TableMap:          strategy.table,
 		TableRefs:         strategy.tableRefs,
 		NonValidTableRefs: strategy.nonValidTableRefs,
@@ -174,8 +175,8 @@ func (strategy *generateStrategy) recursivelyFindCollapsingEntry(tableRefKey slr
 				grammary.NewSymbol(grammary.EndOfSequence),
 				slr.CollapseEntry{
 					RuleNumber:           grammarEntry.RuleNumber,
-					Symbol:               rule.LeftSideSymbol(),
-					CountOfSymbolsInRule: countOfSymbolsInRule,
+					Symbol:               symbolCollapsingTo,
+					CountOfSymbolsInRule: countOfSymbolsInCollapsingRule,
 				},
 			)
 			continue
@@ -189,8 +190,8 @@ func (strategy *generateStrategy) recursivelyFindCollapsingEntry(tableRefKey slr
 				nextSymbol,
 				slr.CollapseEntry{
 					RuleNumber:           grammarEntry.RuleNumber,
-					Symbol:               grammary.NewSymbol("R"),
-					CountOfSymbolsInRule: countOfSymbolsInRule,
+					Symbol:               symbolCollapsingTo,
+					CountOfSymbolsInRule: countOfSymbolsInCollapsingRule,
 				},
 			)
 			continue
