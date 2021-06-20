@@ -25,6 +25,18 @@ func (g *Grammar) FindByLeftSideSymbol(symbol grammary.Symbol) map[uint]Rule {
 	return result
 }
 
+func (g *Grammar) FindRulesThatContains(needle grammary.Symbol) map[uint]Rule {
+	result := map[uint]Rule{}
+	for ruleNumber, rule := range g.rules {
+		for _, symbol := range rule.RuleSymbols() {
+			if needle == symbol {
+				result[uint(ruleNumber)] = rule
+			}
+		}
+	}
+	return result
+}
+
 type Rule struct {
 	leftSideSymbol grammary.Symbol
 	ruleSymbols    []grammary.Symbol
@@ -36,6 +48,15 @@ func (r *Rule) LeftSideSymbol() grammary.Symbol {
 
 func (r *Rule) RuleSymbols() []grammary.Symbol {
 	return r.ruleSymbols
+}
+
+func (r *Rule) Find(symbol grammary.Symbol) *int {
+	for i, ruleSymbol := range r.ruleSymbols {
+		if ruleSymbol == symbol {
+			return &i
+		}
+	}
+	return nil
 }
 
 func New(axiom grammary.Symbol, rules ...Rule) Grammar {
