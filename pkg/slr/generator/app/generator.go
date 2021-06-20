@@ -5,6 +5,7 @@ import (
 	slr "compiler/pkg/slr/common"
 	"compiler/pkg/slr/common/inlinedgrammary"
 	"fmt"
+	"sort"
 )
 
 type Generator interface {
@@ -52,8 +53,6 @@ func (strategy *generateStrategy) do() (slr.Table, error) {
 
 	for len(strategy.tableRefsStack) != 0 {
 
-		strategy.printState()
-
 		tableRef := strategy.tableRefsStack[len(strategy.tableRefsStack)-1]
 		tableEntry := strategy.tableRefs[tableRef]
 
@@ -61,8 +60,6 @@ func (strategy *generateStrategy) do() (slr.Table, error) {
 		strategy.tableRefsStack = strategy.tableRefsStack[:len(strategy.tableRefsStack)-1]
 
 		for _, grammarEntry := range tableEntry.GrammarEntries {
-
-			//strategy.printState()
 
 			rule := strategy.grammar.Rules()[grammarEntry.RuleNumber]
 
@@ -80,7 +77,6 @@ func (strategy *generateStrategy) do() (slr.Table, error) {
 			symbol := rule.RuleSymbols()[nextNumberInRule]
 
 			if !symbol.NonTerminal() {
-				fmt.Println("SOME REF", tableRef)
 				strategy.safeWriteToTableEntryNewGrammarEntry(
 					tableRef,
 					symbol,
@@ -105,8 +101,6 @@ func (strategy *generateStrategy) do() (slr.Table, error) {
 
 			strategy.proceedRecursiveTransitClosure(tableRef, symbol)
 		}
-		fmt.Println("ITERATION")
-		fmt.Println()
 	}
 
 	return slr.Table{
@@ -160,7 +154,7 @@ func (strategy *generateStrategy) recursivelyFindCollapsingEntry(tableRefKey slr
 			grammary.NewSymbol(grammary.EndOfSequence),
 			slr.CollapseEntry{
 				RuleNumber:           grammarEntry.RuleNumber,
-				Symbol:               grammary.NewSymbol("R"),
+				Symbol:               symbolCollapsingTo,
 				CountOfSymbolsInRule: countOfSymbolsInCollapsingRule,
 			},
 		)
@@ -171,8 +165,6 @@ func (strategy *generateStrategy) recursivelyFindCollapsingEntry(tableRefKey slr
 
 	for _, entry := range grammarEntries {
 		rule := strategy.grammar.Rules()[entry.RuleNumber]
-		fmt.Println("RULE", rule)
-		fmt.Println("GRAMMAR ENTRY", entry)
 		countOfSymbolsInRule := uint(len(rule.RuleSymbols()))
 
 		// checking that element last in axiom rule
@@ -182,7 +174,7 @@ func (strategy *generateStrategy) recursivelyFindCollapsingEntry(tableRefKey slr
 				grammary.NewSymbol(grammary.EndOfSequence),
 				slr.CollapseEntry{
 					RuleNumber:           grammarEntry.RuleNumber,
-					Symbol:               grammary.NewSymbol("R"),
+					Symbol:               rule.LeftSideSymbol(),
 					CountOfSymbolsInRule: countOfSymbolsInRule,
 				},
 			)
@@ -307,7 +299,6 @@ func (strategy *generateStrategy) findGrammarEntriesForSymbol(symbol grammary.Sy
 func (strategy *generateStrategy) fetchSameTableEntry(entry slr.TableEntry) *int {
 	for tableRef, tableEntry := range strategy.tableRefs {
 		if tableEntry.Equal(entry) {
-			fmt.Printf("EQUAL: %s - %s\n", tableEntry, entry)
 			return &tableRef
 		}
 	}
