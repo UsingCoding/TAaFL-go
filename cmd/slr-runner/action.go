@@ -43,7 +43,9 @@ func executeAction(ctx *cli.Context) error {
 }
 
 func buildAnalyzer(_ *cli.Context) slr.Analyzer {
+	filledGrammarFilter := filter.NewFilledGrammarFilter()
 	emptySymbolFilter := filter.NewEmptySymbolFilter()
+
 	generator := slrgenerator.NewGenerator()
 	validator := slrgenerator.NewValidator()
 	tableSerializer := serializer.NewCSVSerializer()
@@ -54,7 +56,10 @@ func buildAnalyzer(_ *cli.Context) slr.Analyzer {
 	runner := slrrunnner.NewRunner(buildLexer())
 
 	return slr.NewAnalyzer(
-		emptySymbolFilter,
+		[]filter.InlinedGrammarFilter{
+			filledGrammarFilter,
+			emptySymbolFilter,
+		},
 		generator,
 		validator,
 		exporter,

@@ -13,14 +13,14 @@ type Analyzer interface {
 }
 
 func NewAnalyzer(
-	grammarFilter filter.InlinedGrammarFilter,
+	grammarFilters []filter.InlinedGrammarFilter,
 	tableGenerator generator.Generator,
 	tableValidator generator.Validator,
 	tableExporter export.TableExporter,
 	runner runner.Runner,
 ) Analyzer {
 	return &analyzer{
-		grammarFilter:  grammarFilter,
+		grammarFilters: grammarFilters,
 		tableGenerator: tableGenerator,
 		tableValidator: tableValidator,
 		tableExporter:  tableExporter,
@@ -29,7 +29,7 @@ func NewAnalyzer(
 }
 
 type analyzer struct {
-	grammarFilter  filter.InlinedGrammarFilter
+	grammarFilters []filter.InlinedGrammarFilter
 	tableGenerator generator.Generator
 	tableValidator generator.Validator
 	tableExporter  export.TableExporter
@@ -37,9 +37,14 @@ type analyzer struct {
 }
 
 func (slr *analyzer) Analyze(grammar inlinedgrammary.Grammar) error {
-	filteredGrammar, err := slr.grammarFilter.Filter(grammar)
-	if err != nil {
-		return err
+	var filteredGrammar inlinedgrammary.Grammar
+	var err error
+
+	for _, grammarFilter := range slr.grammarFilters {
+		filteredGrammar, err = grammarFilter.Filter(grammar)
+		if err != nil {
+			return err
+		}
 	}
 
 	table, err := slr.tableGenerator.GenerateTable(filteredGrammar)
