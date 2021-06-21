@@ -3,6 +3,7 @@ package slr
 import (
 	"compiler/pkg/slr/common/inlinedgrammary"
 	"compiler/pkg/slr/export"
+	filter "compiler/pkg/slr/filter/app"
 	generator "compiler/pkg/slr/generator/app"
 	runner "compiler/pkg/slr/runner/app"
 )
@@ -12,7 +13,7 @@ type Analyzer interface {
 }
 
 func NewAnalyzer(
-	grammarFilter generator.InlinedGrammarFilter,
+	grammarFilter filter.InlinedGrammarFilter,
 	tableGenerator generator.Generator,
 	tableValidator generator.Validator,
 	tableExporter export.TableExporter,
@@ -28,7 +29,7 @@ func NewAnalyzer(
 }
 
 type analyzer struct {
-	grammarFilter  generator.InlinedGrammarFilter
+	grammarFilter  filter.InlinedGrammarFilter
 	tableGenerator generator.Generator
 	tableValidator generator.Validator
 	tableExporter  export.TableExporter

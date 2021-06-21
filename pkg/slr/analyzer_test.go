@@ -5,6 +5,7 @@ import (
 	commonlexer "compiler/pkg/common/lexer"
 	"compiler/pkg/slr/common"
 	"compiler/pkg/slr/common/inlinedgrammary"
+	filter "compiler/pkg/slr/filter/app"
 	slrgenerator "compiler/pkg/slr/generator/app"
 	slrrunnner "compiler/pkg/slr/runner/app"
 	"github.com/pkg/errors"
@@ -77,7 +78,7 @@ func TestAnalyzer_Analyze2(t *testing.T) {
 }
 
 func buildAnalyzer(lexems ...commonlexer.Lexem) Analyzer {
-	emptySymbolFilter := slrgenerator.NewEmptySymbolFilter()
+	emptySymbolFilter := filter.NewEmptySymbolFilter()
 	generator := slrgenerator.NewGenerator()
 	validator := slrgenerator.NewValidator()
 	runner := slrrunnner.NewRunner(&mockLexer{lexems: lexems})

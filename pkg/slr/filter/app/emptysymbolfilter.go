@@ -7,10 +7,6 @@ import (
 	"github.com/pkg/errors"
 )
 
-type InlinedGrammarFilter interface {
-	Filter(grammar inlinedgrammary.Grammar) (inlinedgrammary.Grammar, error)
-}
-
 func NewEmptySymbolFilter() InlinedGrammarFilter {
 	return &emptySymbolFilter{}
 }

@@ -2,6 +2,7 @@ package main
 
 import (
 	"compiler/pkg/common/lexer"
+	filter "compiler/pkg/slr/filter/app"
 	slrrunnner "compiler/pkg/slr/runner/app"
 	"fmt"
 	"github.com/urfave/cli/v2"
@@ -42,7 +43,7 @@ func executeAction(ctx *cli.Context) error {
 }
 
 func buildAnalyzer(_ *cli.Context) slr.Analyzer {
-	emptySymbolFilter := slrgenerator.NewEmptySymbolFilter()
+	emptySymbolFilter := filter.NewEmptySymbolFilter()
 	generator := slrgenerator.NewGenerator()
 	validator := slrgenerator.NewValidator()
 	tableSerializer := serializer.NewCSVSerializer()
