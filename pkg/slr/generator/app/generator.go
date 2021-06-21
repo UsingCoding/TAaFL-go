@@ -60,9 +60,6 @@ func (strategy *generateStrategy) do() (slr.Table, error) {
 		strategy.tableRefsStack = strategy.tableRefsStack[:len(strategy.tableRefsStack)-1]
 
 		for _, grammarEntry := range tableEntry.GrammarEntries {
-
-			strategy.printState()
-
 			rule := strategy.grammar.Rules()[grammarEntry.RuleNumber]
 
 			nextNumberInRule := grammarEntry.NumberInRule + 1

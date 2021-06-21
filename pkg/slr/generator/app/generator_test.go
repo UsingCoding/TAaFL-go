@@ -229,6 +229,9 @@ func TestGenerator_GenerateTable_NonValidGrammar(t *testing.T) {
 	assert.NoError(t, err)
 
 	assert.Error(t, validator.Validate(table), ErrNotSlrGrammar{})
+
+	assert.Equal(t, fmt.Sprint(table.TableMap), "map[0:map[<E>:1 i:2] 1:map[+:6 _|_:5] 2:map[+:4 _|_:3] 6:map[<E>:7 i:2] 7:map[+:10 _|_:9]]")
+	assert.Equal(t, fmt.Sprint(table.TableRefs), "[<F>00 <E>00,<E>10 i20 R:1 R:1 R:0 +11 <E>12,<E>10  R:1 +11,R:1]")
 }
 
 // Added for more detailed error messages
