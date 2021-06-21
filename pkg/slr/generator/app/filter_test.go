@@ -90,6 +90,39 @@ func TestEmptySymbolFilter_FilterRecursive(t *testing.T) {
 	)
 }
 
+func TestEmptySymbolFilter_Filter2(t *testing.T) {
+	filter := NewEmptySymbolFilter()
+
+	filteredGrammar, err := filter.Filter(inlinedgrammary.New(
+		grammary.NewSymbol("<F>"),
+		inlinedgrammary.NewRule(grammary.NewSymbol("<F>"), []grammary.Symbol{
+			grammary.NewSymbol("a"),
+			grammary.NewSymbol("<A>"),
+			grammary.NewSymbol("<B>"),
+		}),
+		inlinedgrammary.NewRule(grammary.NewSymbol("<A>"), []grammary.Symbol{
+			grammary.NewSymbol("c"),
+			grammary.NewSymbol("<A>"),
+			grammary.NewSymbol("b"),
+		}),
+		inlinedgrammary.NewRule(grammary.NewSymbol("<A>"), []grammary.Symbol{
+			grammary.NewSymbol("e"),
+		}),
+		inlinedgrammary.NewRule(grammary.NewSymbol("<B>"), []grammary.Symbol{
+			grammary.NewSymbol("a"),
+		}),
+	))
+	assert.NoError(t, err)
+
+	sortGrammar(filteredGrammar)
+
+	assert.Equal(
+		t,
+		"{{<F>} [{{<F>} [{a} {<A>} {<B>}]} {{<F>} [{a} {<B>}]} {{<B>} [{a}]} {{<A>} [{c} {<A>} {b}]} {{<A>} [{c} {b}]}]}",
+		fmt.Sprint(filteredGrammar),
+	)
+}
+
 func sortGrammar(grammar inlinedgrammary.Grammar) {
 	sort.SliceStable(grammar.Rules(), func(i, j int) bool {
 		aRule := grammar.Rules()[i]
@@ -118,4 +151,10 @@ func sortGrammar(grammar inlinedgrammary.Grammar) {
 		}
 		return true
 	})
+}
+
+func printGrammar(grammar inlinedgrammary.Grammar) {
+	for _, rule := range grammar.Rules() {
+		fmt.Printf("%s -> %s\n", rule.LeftSideSymbol(), rule.RuleSymbols())
+	}
 }
