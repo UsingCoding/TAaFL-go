@@ -54,16 +54,6 @@ func (filter *emptySymbolFilter) Filter(grammar inlinedgrammary.Grammar) (newGra
 		}
 	}
 
-	// temporary commented
-	//sort.SliceStable(newGrammar.Rules(), func(i, j int) bool {
-	//	a := newGrammar.Rules()[i].LeftSideSymbol()
-	//	b := newGrammar.Rules()[j].LeftSideSymbol()
-	//	if a.String() < b.String() {
-	//		return false
-	//	}
-	//	return true
-	//})
-
 	return newGrammar, nil
 }
 
