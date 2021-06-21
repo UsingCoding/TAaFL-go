@@ -38,12 +38,12 @@ func (slr *analyzer) Analyze(grammar inlinedgrammary.Grammar) error {
 		return err
 	}
 
-	err = slr.tableValidator.Validate(table)
+	err = slr.tableExporter.Export(table)
 	if err != nil {
 		return err
 	}
 
-	err = slr.tableExporter.Export(table)
+	err = slr.tableValidator.Validate(table)
 	if err != nil {
 		return err
 	}

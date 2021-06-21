@@ -208,6 +208,29 @@ func TestGenerator_GenerateTable_RecursiveGrammar(t *testing.T) {
 	assert.Equal(t, expectedNonValidRefs, fmt.Sprint(table.NonValidTableRefs))
 }
 
+func TestGenerator_GenerateTable_NonValidGrammar(t *testing.T) {
+	generator := NewGenerator()
+	validator := NewValidator()
+
+	table, err := generator.GenerateTable(inlinedgrammary.New(
+		grammary.NewSymbol("<F>"),
+		inlinedgrammary.NewRule(grammary.NewSymbol("<F>"), []grammary.Symbol{
+			grammary.NewSymbol("<E>"),
+		}),
+		inlinedgrammary.NewRule(grammary.NewSymbol("<E>"), []grammary.Symbol{
+			grammary.NewSymbol("<E>"),
+			grammary.NewSymbol("+"),
+			grammary.NewSymbol("<E>"),
+		}),
+		inlinedgrammary.NewRule(grammary.NewSymbol("<E>"), []grammary.Symbol{
+			grammary.NewSymbol("i"),
+		}),
+	))
+	assert.NoError(t, err)
+
+	assert.Error(t, validator.Validate(table), ErrNotSlrGrammar{})
+}
+
 // Added for more detailed error messages
 func assertTableRefsEqual(t *testing.T, expected, actual slr.TableRefs) {
 	for i, expectedTableEntry := range expected {

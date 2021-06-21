@@ -61,6 +61,8 @@ func (strategy *generateStrategy) do() (slr.Table, error) {
 
 		for _, grammarEntry := range tableEntry.GrammarEntries {
 
+			strategy.printState()
+
 			rule := strategy.grammar.Rules()[grammarEntry.RuleNumber]
 
 			nextNumberInRule := grammarEntry.NumberInRule + 1
@@ -120,6 +122,7 @@ func (strategy *generateStrategy) proceedRecursiveTransitClosure(tableRefKey slr
 	}
 	sort.Ints(keys)
 
+	// we sort map keys to have predictable order in grammar entry
 	for _, key := range keys {
 		ruleNumber := uint(key)
 		rule := rulesMap[ruleNumber]
@@ -127,8 +130,16 @@ func (strategy *generateStrategy) proceedRecursiveTransitClosure(tableRefKey slr
 		symbol := rule.RuleSymbols()[firstSymbolPos]
 
 		if symbol.NonTerminal() {
-			strategy.proceedRecursiveTransitClosure(tableRefKey, symbol)
-			return
+			strategy.safeWriteToTableEntryNewGrammarEntry(
+				tableRefKey,
+				symbol,
+				slr.GrammarEntry{
+					Symbol:       symbol,
+					RuleNumber:   ruleNumber,
+					NumberInRule: firstSymbolPos,
+				},
+			)
+			continue
 		}
 
 		strategy.safeWriteToTableEntryNewGrammarEntry(
@@ -165,6 +176,10 @@ func (strategy *generateStrategy) recursivelyFindCollapsingEntry(tableRefKey slr
 	grammarEntries := strategy.findGrammarEntriesForSymbol(symbolCollapsingTo)
 
 	for _, entry := range grammarEntries {
+		if entry == grammarEntry {
+			continue
+		}
+
 		rule := strategy.grammar.Rules()[entry.RuleNumber]
 		countOfSymbolsInRule := uint(len(rule.RuleSymbols()))
 
@@ -179,6 +194,11 @@ func (strategy *generateStrategy) recursivelyFindCollapsingEntry(tableRefKey slr
 					CountOfSymbolsInRule: countOfSymbolsInCollapsingRule,
 				},
 			)
+			continue
+		}
+
+		if entry.NumberInRule+1 >= uint(len(rule.RuleSymbols())) {
+			strategy.recursivelyFindCollapsingEntry(tableRefKey, entry)
 			continue
 		}
 
