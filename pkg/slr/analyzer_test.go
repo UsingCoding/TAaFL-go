@@ -77,11 +77,13 @@ func TestAnalyzer_Analyze2(t *testing.T) {
 }
 
 func buildAnalyzer(lexems ...commonlexer.Lexem) Analyzer {
+	emptySymbolFilter := slrgenerator.NewEmptySymbolFilter()
 	generator := slrgenerator.NewGenerator()
 	validator := slrgenerator.NewValidator()
 	runner := slrrunnner.NewRunner(&mockLexer{lexems: lexems})
 
 	return NewAnalyzer(
+		emptySymbolFilter,
 		generator,
 		validator,
 		&mockExporter{},
