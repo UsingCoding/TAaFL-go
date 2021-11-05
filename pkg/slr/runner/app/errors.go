@@ -1,10 +1,11 @@
 package app
 
 import (
+	"fmt"
+
 	"compiler/pkg/common/grammary"
 	"compiler/pkg/common/lexer"
 	"compiler/pkg/slr/common"
-	"fmt"
 )
 
 type ErrUnexpectedSymbol struct {
@@ -41,7 +42,13 @@ func (strategy *proceedStrategy) prepareUnexpectedSymbolErr(
 ) error {
 	var expectedSymbols []grammary.Symbol
 	for symbol := range strategy.table.TableMap[currentState] {
-		expectedSymbols = append(expectedSymbols, symbol)
+		const appendNonTerminals = true
+
+		// Append only terminals
+		// Intentionally append nonTerminal for debug purposes
+		if !symbol.NonTerminal() || appendNonTerminals {
+			expectedSymbols = append(expectedSymbols, symbol)
+		}
 	}
 
 	return &ErrUnexpectedSymbol{

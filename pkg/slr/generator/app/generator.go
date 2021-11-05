@@ -1,11 +1,12 @@
 package app
 
 import (
+	"fmt"
+	"sort"
+
 	"compiler/pkg/common/grammary"
 	slr "compiler/pkg/slr/common"
 	"compiler/pkg/slr/common/inlinedgrammary"
-	"fmt"
-	"sort"
 )
 
 type Generator interface {
@@ -69,6 +70,16 @@ func (strategy *generateStrategy) do() (slr.Table, error) {
 			}
 
 			if int(nextNumberInRule) == len(rule.RuleSymbols()) {
+
+				// If symbol is nonTerminal need to proceed transit closure
+				if grammarEntry.Symbol.NonTerminal() {
+					symbol := grammarEntry.Symbol
+
+					// This additional transit closure adds records which doesn't affect on runner
+					strategy.proceedRecursiveTransitClosure(tableRef, symbol)
+					continue
+				}
+
 				strategy.recursivelyFindCollapsingEntry(tableRef, grammarEntry)
 				continue
 			}
@@ -136,6 +147,9 @@ func (strategy *generateStrategy) proceedRecursiveTransitClosure(tableRefKey slr
 					NumberInRule: firstSymbolPos,
 				},
 			)
+
+			strategy.proceedRecursiveTransitClosure(tableRefKey, symbol)
+
 			continue
 		}
 
@@ -212,6 +226,12 @@ func (strategy *generateStrategy) recursivelyFindCollapsingEntry(tableRefKey slr
 				},
 			)
 			continue
+		}
+
+		// If symbol from grammar entry last in rule stop recursive collapsing entry search
+		// Since collapsing entry already written in table
+		if grammarEntry.NumberInRule == countOfSymbolsInCollapsingRule-1 {
+			return
 		}
 
 		strategy.recursivelyFindCollapsingEntry(tableRefKey, grammarEntry)

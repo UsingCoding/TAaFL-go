@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"testing"
 
-	slr "compiler/pkg/slr/common"
 	"github.com/stretchr/testify/assert"
+
+	slr "compiler/pkg/slr/common"
 
 	"compiler/pkg/common/grammary"
 	"compiler/pkg/slr/common/inlinedgrammary"
