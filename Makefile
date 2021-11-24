@@ -9,6 +9,7 @@ all: build test
 build: modules
 	bin/go-build.sh "cmd/$(APP_LL1_RUNNER_CMD_NAME)" "bin/$(APP_LL1_RUNNER_CMD_NAME)" $(APP_LL1_RUNNER_CMD_NAME)
 	bin/go-build.sh "cmd/$(APP_SLR_RUNNER_CMD_NAME)" "bin/$(APP_SLR_RUNNER_CMD_NAME)" $(APP_SLR_RUNNER_CMD_NAME)
+	bin/go-build-debug.sh "cmd/$(APP_SLR_RUNNER_CMD_NAME)" "bin/$(APP_SLR_RUNNER_CMD_NAME)-debug" $(APP_SLR_RUNNER_CMD_NAME)
 	bin/cpp-build.sh "data/$(APP_LEXER_CMD_NAME)/main.cpp" "bin/$(APP_LEXER_CMD_NAME)"
 
 .PHONY: modules
@@ -30,6 +31,11 @@ run-runner:
 .PHONY: run-slr-runner
 run-slr-runner:
 	bin/$(APP_SLR_RUNNER_CMD_NAME) "-l" "bin/$(APP_LEXER_CMD_NAME)" "-g" "data/SLR/grammar" "-i" "data/SLR/program"
+
+.PHONY: run-slr-runner-debug
+run-slr-runner-debug:
+	dlv --listen=:2345 --headless=true --api-version=2 --accept-multiclient exec bin/$(APP_SLR_RUNNER_CMD_NAME) -- "-l" "bin/$(APP_LEXER_CMD_NAME)" "-g" "data/SLR/grammar" "-i" "data/SLR/program"
+
 
 .PHONY: publish
 publish:

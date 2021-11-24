@@ -76,7 +76,7 @@ func (strategy *generateStrategy) do() (slr.Table, error) {
 					symbol := grammarEntry.Symbol
 
 					// This additional transit closure adds records which doesn't affect on runner
-					strategy.proceedRecursiveTransitClosure(tableRef, symbol)
+					strategy.proceedRecursiveTransitClosure(tableRef, symbol, nil)
 					continue
 				}
 
@@ -99,7 +99,7 @@ func (strategy *generateStrategy) do() (slr.Table, error) {
 				continue
 			}
 
-			strategy.safeWriteToTableEntryNewGrammarEntry(
+			newTableRef := strategy.safeWriteToTableEntryNewGrammarEntry(
 				tableRef,
 				symbol,
 				slr.GrammarEntry{
@@ -109,7 +109,7 @@ func (strategy *generateStrategy) do() (slr.Table, error) {
 				},
 			)
 
-			strategy.proceedRecursiveTransitClosure(tableRef, symbol)
+			strategy.proceedRecursiveTransitClosure(tableRef, symbol, &newTableRef)
 		}
 	}
 
@@ -121,7 +121,17 @@ func (strategy *generateStrategy) do() (slr.Table, error) {
 	}, nil
 }
 
-func (strategy *generateStrategy) proceedRecursiveTransitClosure(tableRefKey slr.TableRef, handledNonTerminal grammary.Symbol) {
+func (strategy *generateStrategy) proceedRecursiveTransitClosure(
+	tableRefKey slr.TableRef,
+	handledNonTerminal grammary.Symbol,
+	handledNonTerminalTableRef *slr.TableRef,
+) {
+	strategy.printState()
+
+	if handledNonTerminalTableRef != nil {
+		strategy.proceedRecursiveTransitClosure(*handledNonTerminalTableRef, handledNonTerminal, nil)
+	}
+
 	rulesMap := strategy.grammar.FindByLeftSideSymbol(handledNonTerminal)
 
 	keys := make([]int, 0, len(rulesMap))
@@ -138,7 +148,7 @@ func (strategy *generateStrategy) proceedRecursiveTransitClosure(tableRefKey slr
 		symbol := rule.RuleSymbols()[firstSymbolPos]
 
 		if symbol.NonTerminal() {
-			strategy.safeWriteToTableEntryNewGrammarEntry(
+			newTableRef := strategy.safeWriteToTableEntryNewGrammarEntry(
 				tableRefKey,
 				symbol,
 				slr.GrammarEntry{
@@ -148,7 +158,7 @@ func (strategy *generateStrategy) proceedRecursiveTransitClosure(tableRefKey slr
 				},
 			)
 
-			strategy.proceedRecursiveTransitClosure(tableRefKey, symbol)
+			strategy.proceedRecursiveTransitClosure(tableRefKey, symbol, &newTableRef)
 
 			continue
 		}
@@ -242,7 +252,7 @@ func (strategy *generateStrategy) safeWriteToTableEntryNewGrammarEntry(
 	tableRefKey slr.TableRef,
 	symbol grammary.Symbol,
 	grammarEntry slr.GrammarEntry,
-) {
+) slr.TableRef {
 	if _, ok := strategy.table[tableRefKey]; !ok {
 		strategy.table[tableRefKey] = map[grammary.Symbol]slr.TableRef{}
 	}
@@ -258,6 +268,13 @@ func (strategy *generateStrategy) safeWriteToTableEntryNewGrammarEntry(
 
 	tableEntry := strategy.tableRefs[tableRef]
 
+	// If in table entry already exists grammar entry don`t allow adding duplicate
+	for _, entry := range tableEntry.GrammarEntries {
+		if entry == grammarEntry {
+			return tableRef
+		}
+	}
+
 	tableEntry.GrammarEntries = append(tableEntry.GrammarEntries, grammarEntry)
 
 	if sameTableRef := strategy.fetchSameTableEntry(tableEntry); sameTableRef != nil {
@@ -266,10 +283,11 @@ func (strategy *generateStrategy) safeWriteToTableEntryNewGrammarEntry(
 		// mark tableEntry NonValid
 		tableEntry.NonValid = true
 		strategy.nonValidTableRefs = append(strategy.nonValidTableRefs, tableRef)
-		return
+		return slr.TableRef(*sameTableRef)
 	}
 
 	strategy.tableRefs[tableRef] = tableEntry
+	return tableRef
 }
 
 func (strategy *generateStrategy) safeWriteToTableEntryNewCollapseEntry(
