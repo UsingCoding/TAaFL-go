@@ -1,53 +1,40 @@
-export APP_FACTORIZER_CMD_NAME = factorizer
-export APP_GENERATOR_CMD_NAME = generator
-export APP_RUNNER_CMD_NAME = runner
-export APP_LEXER_CMD_NAME = lexer
-export DOCKER_IMAGE_NAME = vadimmakerov/$(APP_CMD_NAME):master
+DOCKER_BUILDER=docker buildx
+DOCKER_BUILD=${DOCKER_BUILDER} build .
 
-all: build test
+IMAGE_TAG?=master
+export IMAGE?=vadimmakerov/compiler:${IMAGE_TAG}
+
+
+all: build check
 
 .PHONY: build
-build: modules
-	bin/go-build.sh "cmd/$(APP_FACTORIZER_CMD_NAME)" "bin/$(APP_FACTORIZER_CMD_NAME)" $(APP_FACTORIZER_CMD_NAME)
-	bin/go-build.sh "cmd/$(APP_GENERATOR_CMD_NAME)" "bin/$(APP_GENERATOR_CMD_NAME)" $(APP_GENERATOR_CMD_NAME)
-	bin/go-build.sh "cmd/$(APP_RUNNER_CMD_NAME)" "bin/$(APP_RUNNER_CMD_NAME)" $(APP_RUNNER_CMD_NAME)
-	bin/cpp-build.sh "data/$(APP_LEXER_CMD_NAME)/main.cpp" "bin/$(APP_LEXER_CMD_NAME)"
+build: build-image
+
+.PHONY: build-image
+build-image:
+	@${DOCKER_BUILD} \
+	--target compiler-image \
+	--output type=docker,name=${IMAGE} \
+	--load # Load image from builder
+
+# Build to docker tarball to chain-ability via pipes
+.PHONY: build-docker-tarball
+build-docker-tarball:
+	@${DOCKER_BUILD} \
+	--target compiler-image \
+	--output type=docker,name=${IMAGE},dest=-
 
 .PHONY: modules
 modules:
-	go mod tidy
-
-.PHONY: test
-test:
-	go test ./...
+	@${DOCKER_BUILD} \
+ 	--target go-mod-tidy \
+	--output .
 
 .PHONY: check
 check:
-	golangci-lint run
+	@${DOCKER_BUILD} \
+ 	--target lint
 
-.PHONY: run-factorizer
-run-factorizer: build
-	bin/$(APP_FACTORIZER_CMD_NAME)
-
-.PHONY: run-generator
-run-generator:
-	bin/$(APP_GENERATOR_CMD_NAME)
-
-.PHONY: run-runner
-run-runner:
-	bin/$(APP_RUNNER_CMD_NAME) "-l" "bin/$(APP_LEXER_CMD_NAME)" "-g" "data/LL_1/grammar" "-i" "data/LL_1/program"
-
-.PHONY: publish
-publish:
-	docker build . --tag=$(DOCKER_IMAGE_NAME)
-
-.PHONY: clear
-clear:
-	rm -rf bin/$(APP_FACTORIZER_CMD_NAME)
-	rm -rf bin/$(APP_GENERATOR_CMD_NAME)
-	rm -rf bin/$(APP_RUNNER_CMD_NAME)
-	rm -rf bin/$(APP_LEXER_CMD_NAME)
-
-.PHONY: build-dproxy
-build-dproxy:
-	docker build . -f Dockerfile.proxy --tag=vadimmakerov/builder-docker-proxy
+.PHONY: cache-clear
+cache-clear: ## Clear the builder cache
+	@${DOCKER_BUILDER} prune --force

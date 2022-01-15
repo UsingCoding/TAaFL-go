@@ -23,10 +23,10 @@ func (r *reporter) Info(args ...interface{}) {
 }
 
 func (r *reporter) Error(args ...interface{}) {
-	r.impl.Error(args)
+	r.impl.Error(args...)
 }
 
 func (r *reporter) WithError(err error, args ...interface{}) {
-	r.impl.WithError(err).Error(args)
+	r.impl.WithError(err).Error(args...)
 	r.impl.Fatal()
 }

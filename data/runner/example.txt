@@ -1,3 +1,0 @@
-main
-int 32
-while if 1234.2
