@@ -1,6 +1,7 @@
 package slr
 
 import (
+	"compiler/pkg/ast/app"
 	"compiler/pkg/slr/common/inlinedgrammary"
 	"compiler/pkg/slr/export"
 	filter "compiler/pkg/slr/filter/app"
@@ -9,7 +10,7 @@ import (
 )
 
 type Analyzer interface {
-	Analyze(grammar inlinedgrammary.Grammar) error
+	Analyze(grammar inlinedgrammary.Grammar) (app.Stack, error)
 }
 
 func NewAnalyzer(
@@ -36,36 +37,36 @@ type analyzer struct {
 	runner         runner.Runner
 }
 
-func (slr *analyzer) Analyze(grammar inlinedgrammary.Grammar) error {
+func (slr *analyzer) Analyze(grammar inlinedgrammary.Grammar) (app.Stack, error) {
 	var filteredGrammar inlinedgrammary.Grammar
 	var err error
 
 	for _, grammarFilter := range slr.grammarFilters {
 		filteredGrammar, err = grammarFilter.Filter(grammar)
 		if err != nil {
-			return err
+			return nil, err
 		}
 	}
 
 	table, err := slr.tableGenerator.GenerateTable(filteredGrammar)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	err = slr.tableExporter.Export(table)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	err = slr.tableValidator.Validate(table)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	err = slr.runner.Proceed(table, filteredGrammar.Axiom())
+	stack, err := slr.runner.Proceed(table, filteredGrammar.Axiom())
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return stack, nil
 }

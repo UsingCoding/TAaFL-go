@@ -11,6 +11,9 @@ import (
 	"github.com/urfave/cli/v2"
 
 	dataslr "compiler/data/SLR"
+	"compiler/pkg/ast/infrastructure/backend"
+	"compiler/pkg/ast/infrastructure/builder"
+	"compiler/pkg/ast/infrastructure/executor"
 	commonlexer "compiler/pkg/common/lexer"
 	"compiler/pkg/lexer/infrastructure"
 	lexerexecutor "compiler/pkg/lexer/infrastructure/executor"
@@ -63,11 +66,25 @@ func executeAction(ctx *cli.Context) error {
 
 	analyzer := buildAnalyzer(lexer)
 
-	err = analyzer.Analyze(grammar)
+	stack, err := analyzer.Analyze(grammar)
 
 	if err == nil {
 		fmt.Println("OK")
 	}
+
+	nodeJSExecutor, err := executor.NewNodeJSExecutor()
+	if err != nil {
+		return err
+	}
+
+	jsBuilder := builder.NewJsBuilder(backend.NewNodeJSAstBuilderBackend(nodeJSExecutor))
+
+	program, err := jsBuilder.Build(stack)
+	if err != nil {
+		return err
+	}
+
+	_, _ = os.Stdout.WriteString(string(program))
 
 	return err
 }

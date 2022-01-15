@@ -1,14 +1,14 @@
 package app
 
 import (
+	ast "compiler/pkg/ast/app"
 	"compiler/pkg/common/grammary"
 	"compiler/pkg/common/lexer"
 	"compiler/pkg/slr/common"
-	"fmt"
 )
 
 type Runner interface {
-	Proceed(table common.Table, axiom grammary.Symbol) error
+	Proceed(table common.Table, axiom grammary.Symbol) (ast.Stack, error)
 }
 
 func NewRunner(lexer lexer.Lexer) Runner {
@@ -19,7 +19,7 @@ type runner struct {
 	lexer lexer.Lexer
 }
 
-func (runner *runner) Proceed(table common.Table, axiom grammary.Symbol) error {
+func (runner *runner) Proceed(table common.Table, axiom grammary.Symbol) (ast.Stack, error) {
 	strategy := proceedStrategy{
 		axiom: axiom,
 		input: &inputStream{lexer: runner.lexer},
@@ -36,18 +36,18 @@ type proceedStrategy struct {
 	stateStack []common.TableRef
 }
 
-func (strategy *proceedStrategy) do() error {
+func (strategy *proceedStrategy) do() (ast.Stack, error) {
 	// add axiom table ref as bottom of stack
 	strategy.stateStack = append(strategy.stateStack, strategy.table.AxiomRef)
 
 	for {
 		lexem, err := strategy.input.fetch()
 		if err != nil {
-			return err
+			return nil, err
 		}
 
 		if lexem.Type == lexer.LexemTypeEOF && len(strategy.stateStack) == 1 {
-			return strategy.prepareUnexpectedEndErr(strategy.stateStack[0])
+			return nil, strategy.prepareUnexpectedEndErr(strategy.stateStack[0])
 		}
 
 		lexemValue := lexem.Value
@@ -57,12 +57,12 @@ func (strategy *proceedStrategy) do() error {
 
 		if state == strategy.table.AxiomRef && expectedSymbol == strategy.axiom {
 			// input is OK
-			return nil
+			return ast.Stack{}, nil
 		}
 
 		tableRef, exists := strategy.table.TableMap[state][expectedSymbol]
 		if !exists {
-			return strategy.prepareUnexpectedSymbolErr(state, expectedSymbol, lexem)
+			return nil, strategy.prepareUnexpectedSymbolErr(state, expectedSymbol, lexem)
 		}
 
 		tableEntry := strategy.table.TableRefs[tableRef]
@@ -94,12 +94,4 @@ func (strategy *proceedStrategy) proceedCollapse(
 
 	strategy.input.prepend(expectedSymbol)
 	strategy.input.prepend(collapseEntry.Symbol)
-}
-
-func (strategy *proceedStrategy) printState() {
-	fmt.Println("STATE")
-
-	fmt.Println("STACK", strategy.stateStack)
-
-	fmt.Println("END STATE")
 }

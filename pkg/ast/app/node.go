@@ -10,17 +10,32 @@ type Symbol struct {
 type Node interface{}
 
 func NewLeafNode(sym Symbol) *LeafNode {
-	return &LeafNode{sym: sym}
+	return &LeafNode{Sym: sym}
 }
 
 type LeafNode struct {
 	Node
 
-	sym Symbol
+	Sym Symbol
 }
 
 func (n LeafNode) String() string {
-	return fmt.Sprintf("Leaf - %s : %s", n.sym.Kind, n.sym.Value)
+	return fmt.Sprintf("Leaf - %s : %s", n.Sym.Kind, n.Sym.Value)
+}
+
+func NewProgramNode(nodes []StackElementPointer) *ProgramNode {
+	return &ProgramNode{Nodes: nodes}
+}
+
+// ProgramNode is Node grouping nodes to program
+type ProgramNode struct {
+	Node
+
+	Nodes []StackElementPointer
+}
+
+func (n ProgramNode) String() string {
+	return fmt.Sprintf("Program - %d nodes", len(n.Nodes))
 }
 
 func NewAdditionNode(
@@ -28,20 +43,20 @@ func NewAdditionNode(
 	rightOperand StackElementPointer,
 ) *AdditionNode {
 	return &AdditionNode{
-		leftOperand:  leftOperand,
-		rightOperand: rightOperand,
+		LeftOperand:  leftOperand,
+		RightOperand: rightOperand,
 	}
 }
 
 type AdditionNode struct {
 	Node
 
-	leftOperand  StackElementPointer
-	rightOperand StackElementPointer
+	LeftOperand  StackElementPointer
+	RightOperand StackElementPointer
 }
 
 func (n AdditionNode) String() string {
-	return fmt.Sprintf("Add - %d : %d", n.leftOperand, n.rightOperand)
+	return fmt.Sprintf("Add - %d : %d", n.LeftOperand, n.RightOperand)
 }
 
 func NewSubtractionNode(
@@ -49,18 +64,18 @@ func NewSubtractionNode(
 	rightOperand StackElementPointer,
 ) *SubtractionNode {
 	return &SubtractionNode{
-		leftOperand:  leftOperand,
-		rightOperand: rightOperand,
+		LeftOperand:  leftOperand,
+		RightOperand: rightOperand,
 	}
 }
 
 type SubtractionNode struct {
 	Node
 
-	leftOperand  StackElementPointer
-	rightOperand StackElementPointer
+	LeftOperand  StackElementPointer
+	RightOperand StackElementPointer
 }
 
 func (n SubtractionNode) String() string {
-	return fmt.Sprintf("sub - %d : %d", n.leftOperand, n.rightOperand)
+	return fmt.Sprintf("sub - %d : %d", n.LeftOperand, n.RightOperand)
 }
