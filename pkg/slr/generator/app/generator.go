@@ -238,11 +238,97 @@ func (strategy *generateStrategy) recursivelyFindCollapsingEntry(tableRefKey slr
 			continue
 		}
 
-		// If symbol from grammar entry last in rule stop recursive collapsing entry search
-		// Since collapsing entry already written in table
-		if grammarEntry.NumberInRule == countOfSymbolsInCollapsingRule-1 {
-			return
+		strategy.findCollapsingEntryForNonTerminalViaTransitClosure(
+			tableRefKey,
+			symbolCollapsingTo,
+			countOfSymbolsInCollapsingRule,
+			slr.GrammarEntry{
+				Symbol:       nextSymbol,
+				RuleNumber:   entry.RuleNumber,
+				NumberInRule: entry.NumberInRule + 1,
+			},
+		)
+	}
+}
+
+// More of func arguments just passed to be recorded to table via safeWriteToTableEntryNewCollapseEntry
+func (strategy *generateStrategy) findCollapsingEntryForNonTerminalViaTransitClosure(
+	tableRefKey slr.TableRef,
+	symbolCollapsingTo grammary.Symbol,
+	countOfSymbolsInCollapsingRule uint,
+	grammarEntry slr.GrammarEntry,
+) {
+	rulesMap := strategy.grammar.FindByLeftSideSymbol(grammarEntry.Symbol)
+
+	keys := make([]int, 0, len(rulesMap))
+	for k := range rulesMap {
+		keys = append(keys, int(k))
+	}
+	sort.Ints(keys)
+
+	// we sort map keys to have predictable order in grammar entry
+	for _, key := range keys {
+		ruleNumber := uint(key)
+		rule := rulesMap[ruleNumber]
+		const firstSymbolPos = 0
+		symbol := rule.RuleSymbols()[firstSymbolPos]
+
+		if symbol.NonTerminal() {
+			strategy.findCollapsingEntryForNonTerminalViaTransitClosure(
+				tableRefKey,
+				symbolCollapsingTo,
+				countOfSymbolsInCollapsingRule,
+				slr.GrammarEntry{
+					Symbol:       symbol,
+					RuleNumber:   ruleNumber,
+					NumberInRule: firstSymbolPos,
+				},
+			)
+			continue
 		}
+
+		strategy.safeWriteToTableEntryNewCollapseEntry(
+			tableRefKey,
+			symbol,
+			slr.CollapseEntry{
+				RuleNumber:           grammarEntry.RuleNumber,
+				Symbol:               symbolCollapsingTo,
+				CountOfSymbolsInRule: countOfSymbolsInCollapsingRule,
+			},
+		)
+	}
+}
+
+func (strategy *generateStrategy) findCollapsingEntryForNonTerminalViaTransitClosureDeprecated(
+	tableRefKey slr.TableRef,
+	symbolCollapsingTo grammary.Symbol,
+	countOfSymbolsInCollapsingRule uint,
+	grammarEntry slr.GrammarEntry,
+) {
+	rule := strategy.grammar.Rules()[grammarEntry.RuleNumber]
+	nextSymbolNumberInRule := grammarEntry.NumberInRule + 1
+
+	if nextSymbolNumberInRule == uint(len(rule.RuleSymbols())) {
+		panic("incorrect usage of generateStrategy.findCollapsingEntryForNonTerminalViaTransitClosure: rule is out of symbols")
+	}
+
+	nextSymbol := rule.RuleSymbols()[nextSymbolNumberInRule]
+
+	newGrammarEntry := slr.GrammarEntry{
+		Symbol:       nextSymbol,
+		RuleNumber:   grammarEntry.RuleNumber,
+		NumberInRule: nextSymbolNumberInRule,
+	}
+
+	if nextSymbol.NonTerminal() {
+		strategy.findCollapsingEntryForNonTerminalViaTransitClosure(
+			tableRefKey,
+			symbolCollapsingTo,
+			countOfSymbolsInCollapsingRule,
+			newGrammarEntry,
+		)
+		return
+	}
 
 		strategy.recursivelyFindCollapsingEntry(tableRefKey, grammarEntry)
 	}

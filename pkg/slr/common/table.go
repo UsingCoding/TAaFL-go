@@ -1,10 +1,12 @@
 package common
 
 import (
-	"compiler/pkg/common/grammary"
 	"fmt"
-	"github.com/pkg/errors"
 	"strings"
+
+	"github.com/pkg/errors"
+
+	"compiler/pkg/common/grammary"
 )
 
 var (
@@ -98,7 +100,7 @@ func (tableEntry TableEntry) Equal(other TableEntry) bool {
 
 func (grammarEntry GrammarEntry) String() string {
 	return fmt.Sprintf(
-		"%s%d%d",
+		"%s:%d:%d",
 		grammarEntry.Symbol.String(),
 		grammarEntry.RuleNumber,
 		grammarEntry.NumberInRule,

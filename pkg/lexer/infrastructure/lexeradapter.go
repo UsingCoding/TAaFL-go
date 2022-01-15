@@ -1,13 +1,14 @@
 package infrastructure
 
 import (
-	"compiler/pkg/common/lexer"
-	"compiler/pkg/lexer/infrastructure/executor"
-	"fmt"
-	"github.com/pkg/errors"
 	"io"
 	"strconv"
 	"strings"
+
+	"github.com/pkg/errors"
+
+	"compiler/pkg/common/lexer"
+	"compiler/pkg/lexer/infrastructure/executor"
 )
 
 const (
@@ -109,9 +110,9 @@ func parseLexem(data string) (lexer.Lexem, error) {
 	}
 
 	lexemType := lexer.LexemType(lexemMetaParts[0])
-	if !isKnownLexemType(lexemType) {
-		return lexer.Lexem{}, errors.New(fmt.Sprintf("unknown lexem type: '%s'", lexemType))
-	}
+	//if !isKnownLexemType(lexemType) {
+	//	return lexer.Lexem{}, errors.New(fmt.Sprintf("unknown lexem type: '%s'", lexemType))
+	//}
 
 	return lexer.Lexem{
 		Type:     lexemType,
