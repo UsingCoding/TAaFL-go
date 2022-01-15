@@ -1,0 +1,90 @@
+<Program> -> <main> <openPar> <closePar> <openSpecPar> <statements> <closeSpecPar>
+
+<main> -> mainToken
+<openPar> -> openParenthesis
+<closePar> -> closingParenthesis
+
+<openSpecPar> -> openSpecParenthesis
+<closeSpecPar> -> closingSpecParenthesis
+
+<statements> -> <statement> <statements> | <statement>
+
+<statement> -> <var>
+<statement> -> <ifOperator>
+<statement> -> <forOperator>
+<statement> -> <MathOperations>
+<statement> -> e
+
+<var> -> <varToken> <id> <colonToken> <type> <appropriation> <value> <semicolon>
+
+<varToken> -> varToken
+
+<type> -> <intToken>
+<type> -> <dblToken>
+<type> -> <intToken>
+<type> -> <boolToken>
+
+<intToken> -> intToken
+<dblToken> -> dblToken
+<boolToken> -> boolToken
+<strToken> -> strToken
+
+ <value> -> <integer>
+ <value> -> <string>
+ <value> -> <trueToken>
+ <value> -> <falseToken>
+
+<ifOperator> -> <ifToken> <Condition>  <openSpecPar> <statements> <closeSpecPar> <ElseBlock>
+
+<ElseBlock> -> <elifToken> <Condition>  <openSpecPar> <statements> <closeSpecPar> <ElseBlock>
+<ElseBlock> -> <elseToken> <openSpecPar> <statements> <closeSpecPar> <ElseBlock>
+<ElseBlock> -> e
+
+<elifToken> -> elifToken
+<elseToken> -> elseToken
+
+<Condition> -> <openPar> <ConditionalExpression> <closePar>
+
+<ConditionalExpression> -> <operand> <comparison> <operand> | <operand>
+
+<operand> -> <id>
+<operand> -> <value>
+
+<ifToken> -> ifToken
+
+<appropriation> -> appropriation
+<id> -> id
+<integer> -> integer
+<string> -> string
+<trueToken> -> trueToken
+<falseToken> -> falseToken
+
+<separator> -> separator
+
+<forOperator> -> <forToken> <iteratorBlock> <ConditionalExpression> <IncrementationBlock> <openSpecPar> <statements> <closeSpecPar>
+
+<iteratorBlock> -> <var> | e
+<IncrementationBlock> -> <MathOperations> <semicolon> | e
+
+<MathOperations> -> <MathOperationsA> <MathOperationsB>
+<MathOperationsA> -> <MathOperationsC> <MathOperationsD>
+<MathOperationsB> -> <summOp> <MathOperationsA> <MathOperationsB>
+<MathOperationsB> -> e
+<MathOperationsD> -> <multiOp> <MathOperationsC> <MathOperationsD>
+<MathOperationsD> -> e
+<MathOperationsC> -> subtraction <MathOperationsC>
+<MathOperationsC> -> <value>
+<MathOperationsC> -> <openPar> <MathOperations> <closePar>
+<multiOp> -> multiplication
+<multiOp> -> division
+<summOp> -> subtraction
+<summOp> -> addition
+
+<forToken> -> forToken
+
+<array> -> <type> <openSquareParenthesis> <operand> <closeSquareParenthesis> <ArrayIdentifier> <StraightSlash> <InitialValuesList> <StraightSlash>
+
+<InitialValuesList> -> <operand> | <operand> <CommaToken> <InitialValuesList> | e
+
+<ArrayIdentifier> -> <id> | e
+<StraightSlash> ->  straightSlashToken

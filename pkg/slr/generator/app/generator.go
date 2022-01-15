@@ -330,8 +330,7 @@ func (strategy *generateStrategy) findCollapsingEntryForNonTerminalViaTransitClo
 		return
 	}
 
-		strategy.recursivelyFindCollapsingEntry(tableRefKey, grammarEntry)
-	}
+	strategy.recursivelyFindCollapsingEntry(tableRefKey, grammarEntry)
 }
 
 func (strategy *generateStrategy) safeWriteToTableEntryNewGrammarEntry(
