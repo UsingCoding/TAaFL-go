@@ -1,21 +1,14 @@
 package backend
 
 import (
+	"bytes"
 	"encoding/json"
-	"io/ioutil"
 
 	"compiler/pkg/ast/infrastructure/executor"
 )
 
-const (
-	script = ""
-
-	tempFilePath = "/tmp"
-	tempFileName = "ast"
-)
-
-func NewNodeJSAstBuilderBackend(nodeJSExecutor executor.NodeJS) AstBuilderBackend {
-	return &nodeJSAstBuilderBackend{nodeJSExecutor: nodeJSExecutor}
+func NewJSASTBuilderBackend(backendExecutor executor.ASTBackendExecutor) AstBuilderBackend {
+	return &nodeJSAstBuilderBackend{backendExecutor: backendExecutor}
 }
 
 type AstBuilderBackend interface {
@@ -23,14 +16,9 @@ type AstBuilderBackend interface {
 }
 
 type nodeJSAstBuilderBackend struct {
-	nodeJSExecutor executor.NodeJS
+	backendExecutor executor.ASTBackendExecutor
 }
 
 func (backend *nodeJSAstBuilderBackend) Generate(ast json.RawMessage) ([]byte, error) {
-	tempFile, err := ioutil.TempFile(tempFilePath, tempFileName)
-	if err != nil {
-		return nil, err
-	}
-
-	return backend.nodeJSExecutor.Output([]string{tempFile.Name()})
+	return backend.backendExecutor.Output([]string{}, executor.WithStdin(bytes.NewBuffer(ast)))
 }

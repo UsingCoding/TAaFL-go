@@ -68,7 +68,7 @@ RUN --mount=target=. \
 FROM scratch as lexer-out
 COPY --from=make-lexer /out/* .
 
-FROM denoland/deno:1.16.4 as deno-base
+FROM denoland/deno:${DENO_VERSION} as deno-base
 
 WORKDIR /app
 

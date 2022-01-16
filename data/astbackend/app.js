@@ -8,4 +8,4 @@ async function fetchFromStdin() {
 }
 
 const code = await fetchFromStdin()
-console.log(generate(code))
+console.log(generate(JSON.parse(code)))

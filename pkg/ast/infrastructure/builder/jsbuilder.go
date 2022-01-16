@@ -2,7 +2,6 @@ package builder
 
 import (
 	"encoding/json"
-	"fmt"
 
 	"github.com/pkg/errors"
 
@@ -27,10 +26,6 @@ func (builder *jsBuilder) Build(s app.Stack) (json.RawMessage, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	fmt.Println(string(ast))
-
-	return nil, errors.New("empty")
 
 	return builder.backend.Generate(ast)
 }

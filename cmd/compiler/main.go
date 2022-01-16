@@ -6,6 +6,7 @@ import (
 	"io"
 	stdlog "log"
 	"os"
+	"os/exec"
 
 	"github.com/pkg/errors"
 	"github.com/urfave/cli/v2"
@@ -31,6 +32,9 @@ func main() {
 
 	err := runApp(ctx, os.Args)
 	if err != nil {
+		if exitErr, ok := err.(*exec.ExitError); ok {
+			stdlog.Println(string(exitErr.Stderr))
+		}
 		stdlog.Fatal(err)
 	}
 }
@@ -72,12 +76,12 @@ func executeAction(ctx *cli.Context) error {
 		fmt.Println("OK")
 	}
 
-	nodeJSExecutor, err := executor.NewNodeJSExecutor()
+	astBackendExecutor, err := executor.NewASTBackendExecutor()
 	if err != nil {
 		return err
 	}
 
-	jsBuilder := builder.NewJsBuilder(backend.NewNodeJSAstBuilderBackend(nodeJSExecutor))
+	jsBuilder := builder.NewJsBuilder(backend.NewJSASTBuilderBackend(astBackendExecutor))
 
 	program, err := jsBuilder.Build(stack)
 	if err != nil {
