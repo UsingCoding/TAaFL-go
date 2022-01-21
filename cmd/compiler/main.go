@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"io"
 	stdlog "log"
 	"os"
@@ -49,6 +48,12 @@ func runApp(ctx context.Context, args []string) error {
 				Usage:   "Lexer executable path",
 				EnvVars: []string{"LEXER_EXECUTABLE"},
 			},
+			&cli.BoolFlag{
+				Name: "printAST",
+				EnvVars: []string{
+					"PRINT_AST",
+				},
+			},
 		},
 	}
 
@@ -72,16 +77,12 @@ func executeAction(ctx *cli.Context) error {
 
 	stack, err := analyzer.Analyze(grammar)
 
-	if err == nil {
-		fmt.Println("OK")
-	}
-
 	astBackendExecutor, err := executor.NewASTBackendExecutor()
 	if err != nil {
 		return err
 	}
 
-	jsBuilder := builder.NewJsBuilder(backend.NewJSASTBuilderBackend(astBackendExecutor))
+	jsBuilder := builder.NewJsBuilder(backend.NewJSASTBuilderBackend(astBackendExecutor), ctx.Bool("printAST"))
 
 	program, err := jsBuilder.Build(stack)
 	if err != nil {

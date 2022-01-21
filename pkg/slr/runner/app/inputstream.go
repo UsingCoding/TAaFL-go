@@ -8,6 +8,7 @@ import (
 type inputLexemStream interface {
 	fetch() (lexer.Lexem, error)
 	prepend(symbol grammary.Symbol)
+	getFromTop(pointer int) lexer.Lexem
 }
 
 type inputStream struct {
@@ -27,4 +28,8 @@ func (input *inputStream) fetch() (lexer.Lexem, error) {
 	}
 
 	return input.lexer.FetchLexem()
+}
+
+func (input *inputStream) getFromTop(pointer int) lexer.Lexem {
+	return input.buffer[len(input.buffer)-pointer]
 }

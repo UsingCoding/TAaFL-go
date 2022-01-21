@@ -35,6 +35,7 @@ type (
 		CollapseEntry *CollapseEntry
 		// non valid when we detect same table entry and remove this one
 		NonValid bool
+		Rule     ASTRule
 	}
 
 	GrammarEntry struct {

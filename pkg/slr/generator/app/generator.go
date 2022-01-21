@@ -396,6 +396,10 @@ func (strategy *generateStrategy) safeWriteToTableEntryNewCollapseEntry(
 
 	tableEntry.CollapseEntry = &grammarEntry
 
+	if astRule := strategy.grammar.Rules()[grammarEntry.RuleNumber].ASTRule(); astRule != nil {
+		tableEntry.Rule = *astRule
+	}
+
 	strategy.tableRefs[tableRef] = tableEntry
 }
 

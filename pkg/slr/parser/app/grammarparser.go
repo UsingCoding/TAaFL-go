@@ -1,11 +1,19 @@
 package app
 
 import (
-	"compiler/pkg/common/grammary"
-	"compiler/pkg/slr/common/inlinedgrammary"
 	"fmt"
-	"github.com/pkg/errors"
+	"regexp"
 	"strings"
+
+	"github.com/pkg/errors"
+
+	"compiler/pkg/common/grammary"
+	"compiler/pkg/slr/common"
+	"compiler/pkg/slr/common/inlinedgrammary"
+)
+
+var (
+	astRuleRegexp = regexp.MustCompile(`<<.*>>`)
 )
 
 type InlinedGrammarParser interface {
@@ -45,7 +53,20 @@ func (p *parser) Parse(rawGrammar string) (inlinedgrammary.Grammar, error) {
 			ruleSymbols = append(ruleSymbols, grammary.NewSymbol(symbol))
 		}
 
-		rules = append(rules, inlinedgrammary.NewRule(leftSideSymbol, ruleSymbols))
+		var astRulePtr *common.ASTRule
+
+		if rawASTRule := symbols[len(symbols)-1]; astRuleRegexp.MatchString(rawASTRule) {
+			rawASTRule = strings.Trim(rawASTRule, "<<>>")
+			astRulePtr = (*common.ASTRule)(&rawASTRule)
+
+			symbols = symbols[:len(symbols)-1]
+		}
+
+		rule := inlinedgrammary.NewRule(leftSideSymbol, ruleSymbols)
+		if astRulePtr != nil {
+			rule.SetASTRule(*astRulePtr)
+		}
+		rules = append(rules, rule)
 	}
 
 	if axiom == nil {

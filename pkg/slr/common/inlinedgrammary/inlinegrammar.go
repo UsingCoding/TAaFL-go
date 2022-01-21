@@ -1,6 +1,9 @@
 package inlinedgrammary
 
-import "compiler/pkg/common/grammary"
+import (
+	"compiler/pkg/common/grammary"
+	"compiler/pkg/slr/common"
+)
 
 type Grammar struct {
 	axiom grammary.Symbol
@@ -40,6 +43,7 @@ func (g *Grammar) FindRulesThatContains(needle grammary.Symbol) map[uint]Rule {
 type Rule struct {
 	leftSideSymbol grammary.Symbol
 	ruleSymbols    []grammary.Symbol
+	astRule        *common.ASTRule
 }
 
 func (r *Rule) LeftSideSymbol() grammary.Symbol {
@@ -48,6 +52,14 @@ func (r *Rule) LeftSideSymbol() grammary.Symbol {
 
 func (r *Rule) RuleSymbols() []grammary.Symbol {
 	return r.ruleSymbols
+}
+
+func (r *Rule) SetASTRule(rule common.ASTRule) {
+	r.astRule = &rule
+}
+
+func (r Rule) ASTRule() *common.ASTRule {
+	return r.astRule
 }
 
 func (r *Rule) Find(symbol grammary.Symbol) *int {
