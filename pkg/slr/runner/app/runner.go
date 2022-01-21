@@ -1,6 +1,10 @@
 package app
 
 import (
+	"fmt"
+
+	"github.com/pkg/errors"
+
 	ast "compiler/pkg/ast/app"
 	"compiler/pkg/common/grammary"
 	"compiler/pkg/common/lexer"
@@ -20,12 +24,14 @@ type runner struct {
 }
 
 func (runner *runner) Proceed(table common.Table, axiom grammary.Symbol) (ast.Stack, error) {
+	symbolStack := &Stack{}
 	strategy := proceedStrategy{
-		axiom: axiom,
-		input: &inputStream{lexer: runner.lexer},
-		table: table,
+		axiom:       axiom,
+		input:       &inputStream{lexer: runner.lexer},
+		table:       table,
+		symbolTable: symbolStack,
 		astBuilder: &astBuilder{
-			symbolTable: SymbolTable{},
+			symbolStack: symbolStack,
 		},
 	}
 
@@ -38,7 +44,8 @@ type proceedStrategy struct {
 	table      common.Table
 	stateStack []common.TableRef
 
-	astBuilder *astBuilder
+	astBuilder  *astBuilder
+	symbolTable *Stack
 }
 
 func (strategy *proceedStrategy) do() (ast.Stack, error) {
@@ -77,7 +84,10 @@ func (strategy *proceedStrategy) do() (ast.Stack, error) {
 			continue
 		}
 
-		strategy.proceedCollapse(tableEntry, expectedSymbol)
+		err = strategy.proceedCollapse(tableEntry, expectedSymbol)
+		if err != nil {
+			return nil, errors.Wrap(err, fmt.Sprintf("at %d line and %d row", lexem.Line, lexem.Position))
+		}
 	}
 }
 
@@ -88,7 +98,7 @@ func (strategy *proceedStrategy) putStateToStack(tableRef common.TableRef) {
 func (strategy *proceedStrategy) proceedCollapse(
 	tableEntry common.TableEntry,
 	expectedSymbol grammary.Symbol,
-) {
+) error {
 	collapseEntry := tableEntry.CollapseEntry
 
 	if collapseEntry.CountOfSymbolsInRule == uint(len(strategy.stateStack)) {
@@ -107,6 +117,11 @@ func (strategy *proceedStrategy) proceedCollapse(
 			strategy.input.getFromTop(3).Value, // Type
 			strategy.input.getFromTop(1).Value, // Value
 		)
+		sym := Symbol{
+			kind: strategy.input.getFromTop(3).Value,
+			name: strategy.input.getFromTop(4).Value,
+		}
+		strategy.symbolTable.GetLast().AddSymbol(sym)
 	case common.UnaryExpression:
 		strategy.astBuilder.buildUnaryExpressionOperand(
 			strategy.input.getFromTop(1).Value, // Operand
@@ -114,19 +129,25 @@ func (strategy *proceedStrategy) proceedCollapse(
 		)
 	case common.VariableOperand:
 		varName := strategy.input.getFromTop(1).Value
+		if variable := strategy.symbolTable.GetLast().Find(varName); variable == nil {
+			return errors.Errorf("cannot find name %s", varName)
+		}
 		strategy.astBuilder.buildVariableOperand(varName) // Only variable name
 	case common.AssigmentExpression:
 		strategy.astBuilder.buildAssigmentExpression()
 	case common.Expression:
 		strategy.astBuilder.buildExpression(strategy.input.getFromTop(1).Value)
 	case common.BeginBlockStatement:
+		strategy.symbolTable.CreateStack()
 		strategy.astBuilder.beginBlockStatement()
 	case common.BlockStatement:
 		strategy.astBuilder.buildBlockStatement()
+		strategy.symbolTable.DeleteLast()
 	case common.Condition:
 		strategy.astBuilder.buildCondition(strategy.input.getFromTop(1).Value)
 	case common.IFStatement:
 		strategy.astBuilder.buildIFStatement()
+		strategy.symbolTable.DeleteLast()
 	case common.UpdateExpression:
 		strategy.astBuilder.updateExpression(strategy.input.getFromTop(2).Value)
 	case common.FORStatement:
@@ -142,4 +163,6 @@ func (strategy *proceedStrategy) proceedCollapse(
 	case common.Division:
 		strategy.astBuilder.buildDivision()
 	}
+
+	return nil
 }

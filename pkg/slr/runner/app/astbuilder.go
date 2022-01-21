@@ -1,10 +1,16 @@
 package app
 
-import ast "compiler/pkg/ast/app"
+import (
+	"fmt"
+
+	"github.com/pkg/errors"
+
+	ast "compiler/pkg/ast/app"
+)
 
 type astBuilder struct {
 	astStack    ast.Stack
-	symbolTable SymbolTable
+	symbolStack *Stack
 
 	pointer *ast.StackElementPointer
 }
@@ -26,7 +32,10 @@ func (builder astBuilder) buildAssigmentExpression() {
 	if topPointer == nil {
 		panic("nil pointer in ast.Stack while building addition node")
 	}
-	//TODO: Type Check
+	err := builder.proceedAllowedTypeConversionsByPointers(*topPointer, *topPointer-1)
+	if err != nil {
+		panic(err)
+	}
 	builder.astStack.Add(ast.NewAssigmentExpression(*topPointer, *topPointer-1))
 }
 
@@ -35,7 +44,10 @@ func (builder astBuilder) buildExpression(operator string) {
 	if topPointer == nil {
 		panic("nil pointer in ast.Stack while building addition node")
 	}
-	//TODO: Type Check
+	err := builder.proceedAllowedTypeConversionsByPointers(*topPointer, *topPointer-1)
+	if err != nil {
+		panic(err)
+	}
 	builder.astStack.Add(ast.NewExpressionNode(operator, *topPointer, *topPointer-1))
 }
 
@@ -68,7 +80,10 @@ func (builder astBuilder) buildCondition(operator string) {
 	if topPointer == nil {
 		panic("nil pointer in ast.Stack while building addition node")
 	}
-	//TODO: Type Check
+	err := builder.proceedAllowedTypeConversionsByPointers(*topPointer, *topPointer-1)
+	if err != nil {
+		panic(err)
+	}
 	builder.astStack.Add(ast.NewConditionNode(operator, *topPointer, *topPointer-1))
 }
 
@@ -119,7 +134,10 @@ func (builder astBuilder) buildAddition() {
 	if topPointer == nil {
 		panic("nil pointer in ast.Stack while building addition node")
 	}
-	//TODO: Type Check
+	err := builder.proceedAllowedTypeConversionsByPointers(*topPointer, *topPointer-1)
+	if err != nil {
+		panic(err)
+	}
 	builder.astStack.Add(ast.NewAdditionNode(*topPointer, *topPointer-1))
 }
 
@@ -127,6 +145,10 @@ func (builder astBuilder) buildSubtraction() {
 	topPointer := builder.astStack.CurrentTopPointer()
 	if topPointer == nil {
 		panic("nil pointer in ast.Stack while building addition node")
+	}
+	err := builder.proceedAllowedTypeConversionsByPointers(*topPointer, *topPointer-1)
+	if err != nil {
+		panic(err)
 	}
 	builder.astStack.Add(ast.NewSubtractionNode(*topPointer, *topPointer-1))
 }
@@ -136,6 +158,10 @@ func (builder astBuilder) buildMultiplication() {
 	if topPointer == nil {
 		panic("nil pointer in ast.Stack while building addition node")
 	}
+	err := builder.proceedAllowedTypeConversionsByPointers(*topPointer, *topPointer-1)
+	if err != nil {
+		panic(err)
+	}
 	builder.astStack.Add(ast.NewMultiplicationNode(*topPointer, *topPointer-1))
 }
 
@@ -144,5 +170,58 @@ func (builder astBuilder) buildDivision() {
 	if topPointer == nil {
 		panic("nil pointer in ast.Stack while building addition node")
 	}
+	err := builder.proceedAllowedTypeConversionsByPointers(*topPointer, *topPointer-1)
+	if err != nil {
+		panic(err)
+	}
 	builder.astStack.Add(ast.NewDivisionNode(*topPointer, *topPointer-1))
+}
+
+func (builder astBuilder) proceedAllowedTypeConversions(firstType, secondType string) error {
+	allower := func(firstType, secondType string) error {
+		if firstType == "boolean" && secondType == "string" {
+			return errors.Errorf("cannot convert properly type %s to type %s in condition statement", firstType, secondType)
+		}
+
+		if firstType == "boolean" && secondType == "int" {
+			return errors.Errorf("cannot convert properly type %s to type %s in condition statement", firstType, secondType)
+		}
+
+		if firstType == "boolean" && secondType == "double" {
+			return errors.Errorf("cannot convert properly type %s to type %s in condition statement", firstType, secondType)
+		}
+
+		return nil
+	}
+
+	err := allower(firstType, secondType)
+	if err != nil {
+		return err
+	}
+
+	return allower(secondType, firstType)
+}
+
+func (builder astBuilder) proceedAllowedTypeConversionsByPointers(firstPointer, secondPointer ast.StackElementPointer) error {
+	return builder.proceedAllowedTypeConversions(
+		builder.fetchTypeFromNode(builder.astStack[firstPointer]),
+		builder.fetchTypeFromNode(builder.astStack[secondPointer]),
+	)
+}
+
+func (builder astBuilder) fetchTypeFromNode(node ast.Node) string {
+	switch concreteNode := node.(type) {
+	case ast.LeafNode:
+		return concreteNode.Sym.Kind
+	case ast.VariableOperandNode:
+		varName := concreteNode.Name
+		variable := builder.symbolStack.GetLast().Find(varName)
+		if variable == nil {
+			panic(fmt.Sprintf("cannot find name %s", varName))
+		}
+
+		return variable.kind
+	}
+
+	panic("unknown node type")
 }
