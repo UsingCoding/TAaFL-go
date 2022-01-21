@@ -1,8 +1,6 @@
 package app
 
 import (
-	"fmt"
-
 	"github.com/pkg/errors"
 
 	ast "compiler/pkg/ast/app"
@@ -30,7 +28,7 @@ func (builder astBuilder) buildVariableOperand(varName string) {
 func (builder astBuilder) buildAssigmentExpression() {
 	topPointer := builder.astStack.CurrentTopPointer()
 	if topPointer == nil {
-		panic("nil pointer in ast.Stack while building addition node")
+		panic(errors.New("nil pointer in ast.Stack while building addition node"))
 	}
 	err := builder.proceedAllowedTypeConversionsByPointers(*topPointer, *topPointer-1)
 	if err != nil {
@@ -42,7 +40,7 @@ func (builder astBuilder) buildAssigmentExpression() {
 func (builder astBuilder) buildExpression(operator string) {
 	topPointer := builder.astStack.CurrentTopPointer()
 	if topPointer == nil {
-		panic("nil pointer in ast.Stack while building addition node")
+		panic(errors.New("nil pointer in ast.Stack while building addition node"))
 	}
 	err := builder.proceedAllowedTypeConversionsByPointers(*topPointer, *topPointer-1)
 	if err != nil {
@@ -53,7 +51,7 @@ func (builder astBuilder) buildExpression(operator string) {
 
 func (builder *astBuilder) beginBlockStatement() {
 	if builder.pointer != nil {
-		panic("astBuilder.pointer already in use")
+		panic(errors.New("astBuilder.pointer already in use"))
 	}
 
 	builder.pointer = builder.astStack.CurrentTopPointer()
@@ -61,7 +59,7 @@ func (builder *astBuilder) beginBlockStatement() {
 
 func (builder *astBuilder) buildBlockStatement() {
 	if builder.pointer == nil {
-		panic("astBuilder.pointer not allocated before")
+		panic(errors.New("astBuilder.pointer not allocated earlier"))
 	}
 	blockBeginning := *builder.pointer
 	builder.pointer = nil
@@ -78,7 +76,7 @@ func (builder *astBuilder) buildBlockStatement() {
 func (builder astBuilder) buildCondition(operator string) {
 	topPointer := builder.astStack.CurrentTopPointer()
 	if topPointer == nil {
-		panic("nil pointer in ast.Stack while building addition node")
+		panic(errors.New("nil pointer in ast.Stack while building addition node"))
 	}
 	err := builder.proceedAllowedTypeConversionsByPointers(*topPointer, *topPointer-1)
 	if err != nil {
@@ -90,7 +88,7 @@ func (builder astBuilder) buildCondition(operator string) {
 func (builder astBuilder) buildIFStatement() {
 	topPointer := builder.astStack.CurrentTopPointer()
 	if topPointer == nil {
-		panic("nil pointer in ast.Stack while building addition node")
+		panic(errors.New("nil pointer in ast.Stack while building addition node"))
 	}
 
 	var alternativePointer *ast.StackElementPointer
@@ -107,7 +105,7 @@ func (builder astBuilder) buildIFStatement() {
 func (builder astBuilder) updateExpression(operator string) {
 	topPointer := builder.astStack.CurrentTopPointer()
 	if topPointer == nil {
-		panic("nil pointer in ast.Stack while building addition node")
+		panic(errors.New("nil pointer in ast.Stack while building addition node"))
 	}
 
 	builder.astStack.Add(ast.NewUpdateExpressionNode(operator, *topPointer))
@@ -116,7 +114,7 @@ func (builder astBuilder) updateExpression(operator string) {
 func (builder astBuilder) buildFORStatement() {
 	topPointer := builder.astStack.CurrentTopPointer()
 	if topPointer == nil {
-		panic("nil pointer in ast.Stack while building FOR statement node")
+		panic(errors.New("nil pointer in ast.Stack while building FOR statement node"))
 	}
 
 	variableDeclPointer := *topPointer - 3
@@ -132,7 +130,7 @@ func (builder astBuilder) buildFORStatement() {
 func (builder astBuilder) buildAddition() {
 	topPointer := builder.astStack.CurrentTopPointer()
 	if topPointer == nil {
-		panic("nil pointer in ast.Stack while building addition node")
+		panic(errors.New("nil pointer in ast.Stack while building addition node"))
 	}
 	err := builder.proceedAllowedTypeConversionsByPointers(*topPointer, *topPointer-1)
 	if err != nil {
@@ -144,7 +142,7 @@ func (builder astBuilder) buildAddition() {
 func (builder astBuilder) buildSubtraction() {
 	topPointer := builder.astStack.CurrentTopPointer()
 	if topPointer == nil {
-		panic("nil pointer in ast.Stack while building addition node")
+		panic(errors.New("nil pointer in ast.Stack while building addition node"))
 	}
 	err := builder.proceedAllowedTypeConversionsByPointers(*topPointer, *topPointer-1)
 	if err != nil {
@@ -156,7 +154,7 @@ func (builder astBuilder) buildSubtraction() {
 func (builder astBuilder) buildMultiplication() {
 	topPointer := builder.astStack.CurrentTopPointer()
 	if topPointer == nil {
-		panic("nil pointer in ast.Stack while building addition node")
+		panic(errors.New("nil pointer in ast.Stack while building addition node"))
 	}
 	err := builder.proceedAllowedTypeConversionsByPointers(*topPointer, *topPointer-1)
 	if err != nil {
@@ -168,7 +166,7 @@ func (builder astBuilder) buildMultiplication() {
 func (builder astBuilder) buildDivision() {
 	topPointer := builder.astStack.CurrentTopPointer()
 	if topPointer == nil {
-		panic("nil pointer in ast.Stack while building addition node")
+		panic(errors.New("nil pointer in ast.Stack while building addition node"))
 	}
 	err := builder.proceedAllowedTypeConversionsByPointers(*topPointer, *topPointer-1)
 	if err != nil {
@@ -217,11 +215,11 @@ func (builder astBuilder) fetchTypeFromNode(node ast.Node) string {
 		varName := concreteNode.Name
 		variable := builder.symbolStack.GetLast().Find(varName)
 		if variable == nil {
-			panic(fmt.Sprintf("cannot find name %s", varName))
+			panic(errors.Errorf("cannot find name %s", varName))
 		}
 
 		return variable.kind
 	}
 
-	panic("unknown node type")
+	panic(errors.New("unknown node type"))
 }

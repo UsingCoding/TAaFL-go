@@ -98,7 +98,12 @@ func (strategy *proceedStrategy) putStateToStack(tableRef common.TableRef) {
 func (strategy *proceedStrategy) proceedCollapse(
 	tableEntry common.TableEntry,
 	expectedSymbol grammary.Symbol,
-) error {
+) (err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = r.(error)
+		}
+	}()
 	collapseEntry := tableEntry.CollapseEntry
 
 	if collapseEntry.CountOfSymbolsInRule == uint(len(strategy.stateStack)) {
