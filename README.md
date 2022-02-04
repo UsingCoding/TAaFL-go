@@ -1,31 +1,45 @@
+### Compiler - compiler from our specific language to JS
+
 ### About
 
-Project with compiler written on golang and lexer written on C++
+#### What is
+
+Compiler written in Go, uses Lexer written in c++ and AST backend with library [escodegen](https://github.com/estools/escodegen) - JS code generator
+
+#### Why JS
+
+Since JavaScript is popular language, and it works completely everywhere. So thus when you write program in our language it`s cross-platform out of the box.
 
 ### Dependencies
 
-Languages:
 * [Golang](https://golang.org/)
 * [C++ - clang compiler](https://clang.llvm.org/)
+* [Deno - modern JS environment](https://clang.llvm.org/)
+  * [escodegen](https://github.com/estools/escodegen) - AST code generator - library just copied into `/data/astbackend/escodegen` and adopted to use in Deno environment.  
 
-Instruments:
-* [Docker](https://www.docker.com/)
-* [Make](https://ru.wikipedia.org/wiki/Make)
+### Usage
 
+Compiler supports compiling only one file.
 
-### Build and run
+Since compiler distributing via Docker image you can run it by passing all argument to container startup command
 
-To run slr-runner run:
-* `make` - it will build everything and run tests
-* `make run-slr-runner` - it`s run slr-runner with some predefined params to easy rerun for development 
+```shell
+docker run --rm -name compiler-script -i vadimmakerov/compiler < in.script > app.js
+```
 
-**If you don`t have clang with required version you can use docker to build binaries**
+Input file passed via stdin and output printed to stdout so it can be redirected further for example JS optimizer or to file 
 
-To build in docker:
-* Run `make build-dproxy` - it`s builds builder container
-* That`s all
+### Build
 
-**To build everything you now can run**
-`./bin/dmake build`
+Tools to build compiler
 
-**Also, when you use dmake available other build steps from Makefile**
+- `make` - To aggregate docker build commands
+- [Docker BuildKit](https://github.com/moby/buildkit) - Improved build system
+- [Docker BuildX](https://github.com/docker/buildx) - docker build plugin
+
+After you install all of it just run
+```shell
+make
+```
+
+It will run linter check and build Docker image with tag `vadimmakerov/compiler:master` 
