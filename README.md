@@ -1,5 +1,7 @@
 ### Compiler - compiler from our specific language to JS
 
+**Repository archived since work on project completed**
+
 ### About
 
 #### What is
